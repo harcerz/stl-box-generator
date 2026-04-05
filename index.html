@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box Generator - STL</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { display: flex; height: 100vh; font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #e0e0e0; overflow: hidden; }
+
+    .controls {
+      width: 320px; min-width: 320px;
+      padding: 20px;
+      background: #16213e;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border-right: 1px solid #0f3460;
+    }
+
+    .controls h1 { font-size: 20px; text-align: center; color: #e94560; }
+
+    .param-group { display: flex; flex-direction: column; gap: 8px; }
+    .param-group h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      border-bottom: 1px solid #0f3460;
+      padding-bottom: 4px;
+      margin-bottom: 2px;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      gap: 8px;
+    }
+
+    .unit { display: flex; align-items: center; gap: 4px; }
+
+    input[type="number"] {
+      width: 72px;
+      padding: 5px 8px;
+      background: #0f3460;
+      border: 1px solid #533483;
+      color: #eee;
+      border-radius: 4px;
+      font-size: 14px;
+      text-align: right;
+    }
+    input[type="number"]:focus { outline: none; border-color: #e94560; }
+    input[type="number"].invalid { border-color: #e94560; background: #3d1225; }
+
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: #e94560; cursor: pointer; }
+
+    .drain-options {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding-left: 14px;
+      border-left: 2px solid #533483;
+      margin-top: 4px;
+    }
+    .drain-options.visible { display: flex; }
+
+    button#exportBtn {
+      padding: 14px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: background 0.2s;
+      margin-top: auto;
+    }
+    button#exportBtn:hover { background: #d63851; }
+    button#exportBtn:active { background: #c02e45; }
+
+    #viewport { flex: 1; position: relative; }
+    #viewport canvas { display: block; }
+
+    .info {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      font-size: 12px;
+      color: #666;
+      font-family: monospace;
+    }
+
+    .error-msg {
+      color: #e94560;
+      font-size: 12px;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    @media (max-width: 700px) {
+      body { flex-direction: column; }
+      .controls { width: 100%; min-width: unset; max-height: 40vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>Box Generator</h1>
+
+    <div class="param-group">
+      <h3>Wymiary zewnetrzne</h3>
+      <label>Szerokosc (X) <span class="unit"><input type="number" id="width" value="100" min="5" step="1"> mm</span></label>
+      <label>Glebokosc (Y) <span class="unit"><input type="number" id="depth" value="100" min="5" step="1"> mm</span></label>
+      <label>Wysokosc (Z) <span class="unit"><input type="number" id="height" value="50" min="3" step="1"> mm</span></label>
+    </div>
+
+    <div class="param-group">
+      <h3>Scianki</h3>
+      <label>Grubosc scianek <span class="unit"><input type="number" id="wallThickness" value="2" min="0.4" step="0.2"> mm</span></label>
+      <label>Grubosc podstawy <span class="unit"><input type="number" id="baseThickness" value="2" min="0.4" step="0.2"> mm</span></label>
+    </div>
+
+    <div class="param-group">
+      <h3>Narozniki</h3>
+      <label>Promien zaokraglenia <span class="unit"><input type="number" id="cornerRadius" value="0" min="0" step="1"> mm</span></label>
+    </div>
+
+    <div class="param-group">
+      <h3>Otwory odplywowe</h3>
+      <label>Wlacz otwory <input type="checkbox" id="drainEnabled"></label>
+      <div class="drain-options" id="drainOptions">
+        <label>Srednica otworu <span class="unit"><input type="number" id="holeDiameter" value="3" min="1" step="0.5"> mm</span></label>
+        <label>Odstep otworow <span class="unit"><input type="number" id="holeSpacing" value="14" min="3" step="1"> mm</span></label>
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <button id="exportBtn">Pobierz STL</button>
+  </div>
+
+  <div id="viewport">
+    <div class="info" id="info"></div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+    import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+
+    // --- DOM refs ---
+    const viewport = document.getElementById('viewport');
+    const infoEl = document.getElementById('info');
+    const errorEl = document.getElementById('errorMsg');
+    const drainCheck = document.getElementById('drainEnabled');
+    const drainOpts = document.getElementById('drainOptions');
+
+    // --- Three.js setup ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+
+    const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 10000);
+    camera.position.set(180, 160, 180);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    viewport.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 25, 0);
+    controls.update();
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(150, 250, 100);
+    scene.add(dirLight);
+    const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    backLight.position.set(-100, 100, -150);
+    scene.add(backLight);
+
+    // Grid
+    const grid = new THREE.GridHelper(300, 30, 0x333355, 0x252545);
+    scene.add(grid);
+
+    // Box material
+    const boxMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff6b35,
+      roughness: 0.6,
+      metalness: 0.05,
+    });
+
+    let boxMesh = null;
+
+    // --- Geometry helpers ---
+
+    function drawRoundedRect(target, w, d, r) {
+      const hw = w / 2, hd = d / 2;
+      r = Math.min(Math.max(r, 0), hw, hd);
+
+      target.moveTo(-hw + r, -hd);
+      target.lineTo(hw - r, -hd);
+      if (r > 0) target.absarc(hw - r, -hd + r, r, -Math.PI / 2, 0, false);
+      target.lineTo(hw, hd - r);
+      if (r > 0) target.absarc(hw - r, hd - r, r, 0, Math.PI / 2, false);
+      target.lineTo(-hw + r, hd);
+      if (r > 0) target.absarc(-hw + r, hd - r, r, Math.PI / 2, Math.PI, false);
+      target.lineTo(-hw, -hd + r);
+      if (r > 0) target.absarc(-hw + r, -hd + r, r, Math.PI, Math.PI * 1.5, false);
+    }
+
+    function generateBoxGeometry(params) {
+      const { width, depth, height, wallThickness, baseThickness, cornerRadius, drainEnabled, holeDiameter, holeSpacing } = params;
+
+      const outerRadius = Math.min(cornerRadius, width / 2, depth / 2);
+      const innerWidth = width - 2 * wallThickness;
+      const innerDepth = depth - 2 * wallThickness;
+      const innerRadius = Math.max(0, outerRadius - wallThickness);
+      const wallHeight = height - baseThickness;
+
+      if (innerWidth <= 0 || innerDepth <= 0 || wallHeight <= 0) return null;
+
+      const geometries = [];
+      const wallCurveSegments = outerRadius > 0 ? 16 : 1;
+
+      // --- Walls: extruded frame (outer - inner hole) ---
+      const wallShape = new THREE.Shape();
+      drawRoundedRect(wallShape, width, depth, outerRadius);
+
+      const innerHole = new THREE.Path();
+      drawRoundedRect(innerHole, innerWidth, innerDepth, innerRadius);
+      wallShape.holes.push(innerHole);
+
+      const wallGeom = new THREE.ExtrudeGeometry(wallShape, {
+        depth: wallHeight,
+        bevelEnabled: false,
+        curveSegments: wallCurveSegments,
+      });
+      // Rotate so extrusion goes along Y (up) instead of Z
+      wallGeom.rotateX(-Math.PI / 2);
+      wallGeom.translate(0, baseThickness, 0);
+      geometries.push(wallGeom);
+
+      // --- Bottom plate ---
+      const bottomShape = new THREE.Shape();
+      drawRoundedRect(bottomShape, width, depth, outerRadius);
+
+      // Drainage holes
+      if (drainEnabled && holeDiameter > 0 && holeSpacing > 0) {
+        const hr = holeDiameter / 2;
+        const margin = wallThickness + hr + 0.5;
+        const areaW = width - 2 * margin;
+        const areaD = depth - 2 * margin;
+
+        if (areaW > 0 && areaD > 0) {
+          const countX = Math.max(1, Math.floor(areaW / holeSpacing) + 1);
+          const countY = Math.max(1, Math.floor(areaD / holeSpacing) + 1);
+          const startX = -(countX - 1) * holeSpacing / 2;
+          const startY = -(countY - 1) * holeSpacing / 2;
+
+          for (let i = 0; i < countX; i++) {
+            for (let j = 0; j < countY; j++) {
+              const cx = startX + i * holeSpacing;
+              const cy = startY + j * holeSpacing;
+
+              // Stay within inner bounds
+              if (Math.abs(cx) + hr <= innerWidth / 2 - 0.5 &&
+                  Math.abs(cy) + hr <= innerDepth / 2 - 0.5) {
+                const hole = new THREE.Path();
+                hole.moveTo(cx + hr, cy);
+                hole.absarc(cx, cy, hr, 0, Math.PI * 2, false);
+                bottomShape.holes.push(hole);
+              }
+            }
+          }
+        }
+      }
+
+      const bottomCurveSegments = (drainEnabled || outerRadius > 0) ? 16 : 1;
+      const bottomGeom = new THREE.ExtrudeGeometry(bottomShape, {
+        depth: baseThickness,
+        bevelEnabled: false,
+        curveSegments: bottomCurveSegments,
+      });
+      bottomGeom.rotateX(-Math.PI / 2);
+      geometries.push(bottomGeom);
+
+      const merged = mergeGeometries(geometries);
+      if (merged) merged.computeVertexNormals();
+      return merged;
+    }
+
+    // --- Read params from form ---
+
+    function getParams() {
+      return {
+        width: parseFloat(document.getElementById('width').value) || 100,
+        depth: parseFloat(document.getElementById('depth').value) || 100,
+        height: parseFloat(document.getElementById('height').value) || 50,
+        wallThickness: parseFloat(document.getElementById('wallThickness').value) || 2,
+        baseThickness: parseFloat(document.getElementById('baseThickness').value) || 2,
+        cornerRadius: parseFloat(document.getElementById('cornerRadius').value) || 0,
+        drainEnabled: drainCheck.checked,
+        holeDiameter: parseFloat(document.getElementById('holeDiameter').value) || 5,
+        holeSpacing: parseFloat(document.getElementById('holeSpacing').value) || 15,
+      };
+    }
+
+    // --- Validation ---
+
+    function validate(p) {
+      const errors = [];
+      if (p.wallThickness * 2 >= p.width) errors.push('Scianki za grube dla tej szerokosci');
+      if (p.wallThickness * 2 >= p.depth) errors.push('Scianki za grube dla tej glebokosci');
+      if (p.baseThickness >= p.height) errors.push('Podstawa za gruba dla tej wysokosci');
+      if (p.cornerRadius > Math.min(p.width, p.depth) / 2) errors.push('Promien zaokraglenia za duzy');
+      if (p.drainEnabled && p.holeDiameter >= Math.min(p.width, p.depth) - 2 * p.wallThickness) {
+        errors.push('Otwory za duze');
+      }
+      return errors;
+    }
+
+    // --- Update preview ---
+
+    function updatePreview() {
+      const params = getParams();
+      const errors = validate(params);
+
+      // Show/hide errors
+      if (errors.length > 0) {
+        errorEl.textContent = errors.join('; ');
+        errorEl.classList.add('visible');
+      } else {
+        errorEl.classList.remove('visible');
+      }
+
+      // Mark invalid fields
+      document.querySelectorAll('input[type="number"]').forEach(input => input.classList.remove('invalid'));
+      if (errors.length > 0) {
+        // Simple heuristic: mark fields that are likely wrong
+        if (params.wallThickness * 2 >= params.width || params.wallThickness * 2 >= params.depth) {
+          document.getElementById('wallThickness').classList.add('invalid');
+        }
+        if (params.baseThickness >= params.height) {
+          document.getElementById('baseThickness').classList.add('invalid');
+        }
+      }
+
+      // Remove old mesh
+      if (boxMesh) {
+        scene.remove(boxMesh);
+        boxMesh.geometry.dispose();
+        boxMesh = null;
+      }
+
+      // Generate new geometry
+      const geometry = generateBoxGeometry(params);
+      if (geometry) {
+        boxMesh = new THREE.Mesh(geometry, boxMaterial);
+        scene.add(boxMesh);
+
+        const triCount = geometry.index
+          ? geometry.index.count / 3
+          : geometry.attributes.position.count / 3;
+        infoEl.textContent = `${params.width} x ${params.depth} x ${params.height} mm | ${Math.round(triCount)} triangles`;
+      } else {
+        infoEl.textContent = 'Invalid parameters';
+      }
+    }
+
+    // --- STL export ---
+
+    function exportSTL() {
+      if (!boxMesh) return;
+      const exporter = new STLExporter();
+      const result = exporter.parse(boxMesh, { binary: true });
+      const blob = new Blob([result], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const p = getParams();
+      a.download = `box_${p.width}x${p.depth}x${p.height}.stl`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Event listeners ---
+
+    let debounceTimer = null;
+    function onParamChange() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updatePreview, 150);
+    }
+
+    document.querySelectorAll('.controls input[type="number"]').forEach(input => {
+      input.addEventListener('input', onParamChange);
+    });
+
+    drainCheck.addEventListener('change', () => {
+      drainOpts.classList.toggle('visible', drainCheck.checked);
+      onParamChange();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', exportSTL);
+
+    // --- Resize ---
+    window.addEventListener('resize', () => {
+      const w = viewport.clientWidth;
+      const h = viewport.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    // --- Render loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // --- Init ---
+    updatePreview();
+    animate();
+  </script>
+</body>
+</html>
