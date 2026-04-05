@@ -25,6 +25,16 @@
     }
     .nav-tab:hover { color: #ccc; }
     .nav-tab.active { background: #1a1a2e; color: #e0e0e0; }
+    .lang-switch {
+      display: flex; gap: 2px; margin-left: 12px;
+    }
+    .lang-btn {
+      padding: 3px 8px; border: 1px solid #533483; border-radius: 3px;
+      background: transparent; color: #888; font-size: 11px; cursor: pointer;
+      font-weight: 700; transition: all 0.15s;
+    }
+    .lang-btn:hover { color: #ccc; }
+    .lang-btn.active { background: #533483; color: #eee; }
 
     /* --- Views --- */
     .view { display: none; flex: 1; overflow: hidden; }
@@ -115,6 +125,10 @@
       <button class="nav-tab active" data-view="planner">Planner</button>
       <button class="nav-tab" data-view="editor">Box Editor</button>
     </div>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="pl">PL</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
     <a class="nav-brand" href="https://sych.pl" target="_blank">sych.pl</a>
   </nav>
 
@@ -122,70 +136,70 @@
   <div id="view-planner" class="view active">
     <div class="controls">
       <div class="param-group">
-        <h3>Szuflada</h3>
+        <h3 data-i18n="drawer">Szuflada</h3>
         <div class="btn-group">
-          <button class="btn btn-secondary btn-sm" id="btnDrawDrawer">Rysuj</button>
-          <button class="btn btn-secondary btn-sm" id="btnEditDrawer">Edytuj</button>
-          <button class="btn btn-danger btn-sm" id="btnClearDrawer">Wyczysc</button>
+          <button class="btn btn-secondary btn-sm" id="btnDrawDrawer" data-i18n="draw">Rysuj</button>
+          <button class="btn btn-secondary btn-sm" id="btnEditDrawer" data-i18n="edit">Edytuj</button>
+          <button class="btn btn-danger btn-sm" id="btnClearDrawer" data-i18n="clear">Wyczysc</button>
         </div>
         <div style="font-size:11px;color:#888" id="drawerDims"></div>
       </div>
 
       <div class="param-group">
-        <h3>Pudelka</h3>
+        <h3 data-i18n="boxes">Pudelka</h3>
         <div class="auto-split-row">
           <input type="number" id="splitCols" value="3" min="1" max="20">
           <span>x</span>
           <input type="number" id="splitRows" value="2" min="1" max="20">
-          <button class="btn btn-secondary btn-sm" id="btnAutoSplit">Podziel</button>
+          <button class="btn btn-secondary btn-sm" id="btnAutoSplit" data-i18n="split">Podziel</button>
         </div>
-        <button class="btn btn-secondary btn-sm btn-block" id="btnAddBox">Dodaj pudelko</button>
+        <button class="btn btn-secondary btn-sm btn-block" id="btnAddBox" data-i18n="addBox">Dodaj pudelko</button>
         <div class="box-list" id="boxList"></div>
       </div>
 
       <div class="param-group">
-        <h3>Globalne parametry</h3>
-        <label>Wysokosc pudelek <span class="unit"><input type="number" id="gBoxHeight" value="50" min="3" step="1"> mm</span></label>
-        <label>Grubosc scianek <span class="unit"><input type="number" id="gWall" value="2" min="0.4" step="0.2"> mm</span></label>
-        <label>Grubosc podstawy <span class="unit"><input type="number" id="gBase" value="2" min="0.4" step="0.2"> mm</span></label>
-        <label>Luz (gap) <span class="unit"><input type="number" id="gGap" value="0.3" min="0" step="0.1"> mm</span></label>
-        <label>Snap siatki <span class="unit"><input type="number" id="gSnap" value="5" min="1" step="1"> mm</span></label>
+        <h3 data-i18n="globalParams">Globalne parametry</h3>
+        <label><span data-i18n="boxHeight">Wysokosc pudelek</span> <span class="unit"><input type="number" id="gBoxHeight" value="50" min="3" step="1"> mm</span></label>
+        <label><span data-i18n="wallThickness">Grubosc scianek</span> <span class="unit"><input type="number" id="gWall" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label><span data-i18n="baseThickness">Grubosc podstawy</span> <span class="unit"><input type="number" id="gBase" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label><span data-i18n="gap">Luz (gap)</span> <span class="unit"><input type="number" id="gGap" value="0.3" min="0" step="0.1"> mm</span></label>
+        <label><span data-i18n="snapGrid">Snap siatki</span> <span class="unit"><input type="number" id="gSnap" value="5" min="1" step="1"> mm</span></label>
       </div>
 
       <div class="param-group selected-box-panel" id="selBoxPanel">
-        <h3>Wybrane pudelko</h3>
-        <label>Pozycja X <span class="unit"><input type="number" id="sbX" step="1"> mm</span></label>
-        <label>Pozycja Y <span class="unit"><input type="number" id="sbY" step="1"> mm</span></label>
-        <label>Szerokosc <span class="unit"><input type="number" id="sbW" min="5" step="1"> mm</span></label>
-        <label>Glebokosc <span class="unit"><input type="number" id="sbD" min="5" step="1"> mm</span></label>
-        <label>Wysokosc <span class="unit"><input type="number" id="sbH" placeholder="glob." step="1"> mm</span></label>
-        <label>Zaokraglenie <span class="unit"><input type="number" id="sbR" value="0" min="0" step="1"> mm</span></label>
-        <label>Otwory <input type="checkbox" id="sbDrain"></label>
+        <h3 data-i18n="selectedBox">Wybrane pudelko</h3>
+        <label><span data-i18n="posX">Pozycja X</span> <span class="unit"><input type="number" id="sbX" step="1"> mm</span></label>
+        <label><span data-i18n="posY">Pozycja Y</span> <span class="unit"><input type="number" id="sbY" step="1"> mm</span></label>
+        <label><span data-i18n="widthLabel">Szerokosc</span> <span class="unit"><input type="number" id="sbW" min="5" step="1"> mm</span></label>
+        <label><span data-i18n="depthLabel">Glebokosc</span> <span class="unit"><input type="number" id="sbD" min="5" step="1"> mm</span></label>
+        <label><span data-i18n="heightLabel">Wysokosc</span> <span class="unit"><input type="number" id="sbH" placeholder="glob." step="1"> mm</span></label>
+        <label><span data-i18n="cornerRadius">Zaokraglenie</span> <span class="unit"><input type="number" id="sbR" value="0" min="0" step="1"> mm</span></label>
+        <label><span data-i18n="drainHoles">Otwory</span> <input type="checkbox" id="sbDrain"></label>
         <div class="sub-options" id="sbDrainOpts">
-          <label>Srednica <span class="unit"><input type="number" id="sbHoleDia" value="3" min="1" step="0.5"> mm</span></label>
-          <label>Odstep <span class="unit"><input type="number" id="sbHoleSpac" value="14" min="3" step="1"> mm</span></label>
+          <label><span data-i18n="holeDiameter">Srednica</span> <span class="unit"><input type="number" id="sbHoleDia" value="3" min="1" step="0.5"> mm</span></label>
+          <label><span data-i18n="holeSpacing">Odstep</span> <span class="unit"><input type="number" id="sbHoleSpac" value="14" min="3" step="1"> mm</span></label>
         </div>
         <div class="btn-group">
-          <button class="btn btn-primary btn-sm" id="btnEditBox3D">Edytuj 3D</button>
-          <button class="btn btn-primary btn-sm" id="btnBoxSTL">Pobierz STL</button>
+          <button class="btn btn-primary btn-sm" id="btnEditBox3D" data-i18n="edit3D">Edytuj 3D</button>
+          <button class="btn btn-primary btn-sm" id="btnBoxSTL" data-i18n="downloadSTL">Pobierz STL</button>
         </div>
-        <button class="btn btn-danger btn-sm btn-block" id="btnDeleteBox">Usun pudelko</button>
+        <button class="btn btn-danger btn-sm btn-block" id="btnDeleteBox" data-i18n="deleteBox">Usun pudelko</button>
       </div>
 
       <div class="param-group" style="margin-top:auto">
-        <h3>Konfiguracja</h3>
+        <h3 data-i18n="configuration">Konfiguracja</h3>
         <div class="btn-group">
-          <button class="btn btn-secondary btn-sm" id="btnSaveJSON">Zapisz JSON</button>
-          <button class="btn btn-secondary btn-sm" id="btnLoadJSON">Wczytaj JSON</button>
+          <button class="btn btn-secondary btn-sm" id="btnSaveJSON" data-i18n="saveJSON">Zapisz JSON</button>
+          <button class="btn btn-secondary btn-sm" id="btnLoadJSON" data-i18n="loadJSON">Wczytaj JSON</button>
         </div>
         <input type="file" id="fileInput" accept=".json" style="display:none">
-        <button class="btn btn-primary btn-block" id="btnExportZIP">Pobierz wszystkie STL (ZIP)</button>
+        <button class="btn btn-primary btn-block" id="btnExportZIP" data-i18n="downloadAllSTL">Pobierz wszystkie STL (ZIP)</button>
       </div>
     </div>
 
     <div class="canvas-container" id="plannerContainer">
       <canvas id="plannerCanvas"></canvas>
-      <div class="info" id="plannerInfo">Kliknij "Rysuj" i narysuj ksztalt szuflady</div>
+      <div class="info" id="plannerInfo"></div>
     </div>
   </div>
 
@@ -198,34 +212,34 @@
       </div>
 
       <div class="param-group">
-        <h3>Wymiary zewnetrzne</h3>
-        <label>Szerokosc (X) <span class="unit"><input type="number" id="edWidth" value="100" min="5" step="1"> mm</span></label>
-        <label>Glebokosc (Y) <span class="unit"><input type="number" id="edDepth" value="100" min="5" step="1"> mm</span></label>
-        <label>Wysokosc (Z) <span class="unit"><input type="number" id="edHeight" value="50" min="3" step="1"> mm</span></label>
+        <h3 data-i18n="extDimensions">Wymiary zewnetrzne</h3>
+        <label><span data-i18n="widthX">Szerokosc (X)</span> <span class="unit"><input type="number" id="edWidth" value="100" min="5" step="1"> mm</span></label>
+        <label><span data-i18n="depthY">Glebokosc (Y)</span> <span class="unit"><input type="number" id="edDepth" value="100" min="5" step="1"> mm</span></label>
+        <label><span data-i18n="heightZ">Wysokosc (Z)</span> <span class="unit"><input type="number" id="edHeight" value="50" min="3" step="1"> mm</span></label>
       </div>
 
       <div class="param-group">
-        <h3>Scianki</h3>
-        <label>Grubosc scianek <span class="unit"><input type="number" id="edWall" value="2" min="0.4" step="0.2"> mm</span></label>
-        <label>Grubosc podstawy <span class="unit"><input type="number" id="edBase" value="2" min="0.4" step="0.2"> mm</span></label>
+        <h3 data-i18n="walls">Scianki</h3>
+        <label><span data-i18n="wallThickness">Grubosc scianek</span> <span class="unit"><input type="number" id="edWall" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label><span data-i18n="baseThickness">Grubosc podstawy</span> <span class="unit"><input type="number" id="edBase" value="2" min="0.4" step="0.2"> mm</span></label>
       </div>
 
       <div class="param-group">
-        <h3>Narozniki</h3>
-        <label>Promien zaokraglenia <span class="unit"><input type="number" id="edRadius" value="0" min="0" step="1"> mm</span></label>
+        <h3 data-i18n="corners">Narozniki</h3>
+        <label><span data-i18n="cornerRadius">Promien zaokraglenia</span> <span class="unit"><input type="number" id="edRadius" value="0" min="0" step="1"> mm</span></label>
       </div>
 
       <div class="param-group">
-        <h3>Otwory odplywowe</h3>
-        <label>Wlacz otwory <input type="checkbox" id="edDrain"></label>
+        <h3 data-i18n="drainHolesSection">Otwory odplywowe</h3>
+        <label><span data-i18n="enableHoles">Wlacz otwory</span> <input type="checkbox" id="edDrain"></label>
         <div class="sub-options" id="edDrainOpts">
-          <label>Srednica otworu <span class="unit"><input type="number" id="edHoleDia" value="3" min="1" step="0.5"> mm</span></label>
-          <label>Odstep otworow <span class="unit"><input type="number" id="edHoleSpac" value="14" min="3" step="1"> mm</span></label>
+          <label><span data-i18n="holeDiameter">Srednica otworu</span> <span class="unit"><input type="number" id="edHoleDia" value="3" min="1" step="0.5"> mm</span></label>
+          <label><span data-i18n="holeSpacing">Odstep otworow</span> <span class="unit"><input type="number" id="edHoleSpac" value="14" min="3" step="1"> mm</span></label>
         </div>
         <div class="error-msg" id="edError"></div>
       </div>
 
-      <button class="btn btn-primary btn-block" id="edExportBtn" style="margin-top:auto">Pobierz STL</button>
+      <button class="btn btn-primary btn-block" id="edExportBtn" style="margin-top:auto" data-i18n="downloadSTL">Pobierz STL</button>
     </div>
 
     <div id="viewport">
@@ -249,6 +263,82 @@
     import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
     import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
+    // ========== I18N ==========
+    const translations = {
+      pl: {
+        drawer: 'Szuflada', draw: 'Rysuj', edit: 'Edytuj', clear: 'Wyczysc',
+        boxes: 'Pudelka', split: 'Podziel', addBox: 'Dodaj pudelko',
+        globalParams: 'Globalne parametry', boxHeight: 'Wysokosc pudelek',
+        wallThickness: 'Grubosc scianek', baseThickness: 'Grubosc podstawy',
+        gap: 'Luz (gap)', snapGrid: 'Snap siatki',
+        selectedBox: 'Wybrane pudelko', posX: 'Pozycja X', posY: 'Pozycja Y',
+        widthLabel: 'Szerokosc', depthLabel: 'Glebokosc', heightLabel: 'Wysokosc',
+        cornerRadius: 'Zaokraglenie', drainHoles: 'Otwory',
+        holeDiameter: 'Srednica', holeSpacing: 'Odstep',
+        edit3D: 'Edytuj 3D', downloadSTL: 'Pobierz STL', deleteBox: 'Usun pudelko',
+        configuration: 'Konfiguracja', saveJSON: 'Zapisz JSON', loadJSON: 'Wczytaj JSON',
+        downloadAllSTL: 'Pobierz wszystkie STL (ZIP)',
+        extDimensions: 'Wymiary zewnetrzne', widthX: 'Szerokosc (X)',
+        depthY: 'Glebokosc (Y)', heightZ: 'Wysokosc (Z)',
+        walls: 'Scianki', corners: 'Narozniki',
+        drainHolesSection: 'Otwory odplywowe', enableHoles: 'Wlacz otwory',
+        // Dynamic strings
+        plannerHint: 'Kliknij "Rysuj" i narysuj ksztalt szuflady',
+        boundingBox: 'Bounding box',
+        zoomBoxes: 'Pudelka',
+        invalidParams: 'Nieprawidlowe parametry',
+        unsupportedVersion: 'Nieobslugiwana wersja pliku',
+        loadError: 'Blad wczytywania',
+      },
+      en: {
+        drawer: 'Drawer', draw: 'Draw', edit: 'Edit', clear: 'Clear',
+        boxes: 'Boxes', split: 'Split', addBox: 'Add box',
+        globalParams: 'Global parameters', boxHeight: 'Box height',
+        wallThickness: 'Wall thickness', baseThickness: 'Base thickness',
+        gap: 'Gap', snapGrid: 'Grid snap',
+        selectedBox: 'Selected box', posX: 'Position X', posY: 'Position Y',
+        widthLabel: 'Width', depthLabel: 'Depth', heightLabel: 'Height',
+        cornerRadius: 'Corner radius', drainHoles: 'Drain holes',
+        holeDiameter: 'Diameter', holeSpacing: 'Spacing',
+        edit3D: 'Edit 3D', downloadSTL: 'Download STL', deleteBox: 'Delete box',
+        configuration: 'Configuration', saveJSON: 'Save JSON', loadJSON: 'Load JSON',
+        downloadAllSTL: 'Download all STL (ZIP)',
+        extDimensions: 'External dimensions', widthX: 'Width (X)',
+        depthY: 'Depth (Y)', heightZ: 'Height (Z)',
+        walls: 'Walls', corners: 'Corners',
+        drainHolesSection: 'Drain holes', enableHoles: 'Enable holes',
+        // Dynamic strings
+        plannerHint: 'Click "Draw" and draw the drawer shape',
+        boundingBox: 'Bounding box',
+        zoomBoxes: 'Boxes',
+        invalidParams: 'Invalid parameters',
+        unsupportedVersion: 'Unsupported file version',
+        loadError: 'Load error',
+      }
+    };
+
+    let currentLang = navigator.language.startsWith('pl') ? 'pl' : 'en';
+
+    function t(key) { return translations[currentLang][key] || translations.en[key] || key; }
+
+    function applyTranslations() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.documentElement.lang = currentLang;
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+      });
+      dirty = true;
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentLang = btn.dataset.lang;
+        applyTranslations();
+      });
+    });
+
     // ========== CONSTANTS ==========
     const BOX_COLORS = ['#ff6b35','#4ecdc4','#45b7d1','#96ceb4','#ffeead','#ff6f69','#88d8b0','#c9b1ff'];
     let nextBoxId = 1;
@@ -259,10 +349,10 @@
       globalParams: { boxHeight: 50, wallThickness: 2, baseThickness: 2, gap: 0.3, snapGrid: 5 },
       boxes: [],
       selectedBoxId: null,
-      editingBoxId: null, // box being edited in 3D editor
+      editingBoxId: null,
     };
 
-    let toolMode = 'idle'; // idle | draw-drawer | edit-drawer | add-box
+    let toolMode = 'idle';
 
     // ========== VIEW SWITCHING ==========
     const navTabs = document.querySelectorAll('.nav-tab');
@@ -282,7 +372,7 @@
     const ctx = canvas.getContext('2d');
     const container = document.getElementById('plannerContainer');
 
-    let camX = 0, camY = 0, zoom = 2; // 1 unit = 1mm, zoom=2 → 2px per mm
+    let camX = 0, camY = 0, zoom = 2;
     let dirty = true;
 
     function resizeCanvas() {
@@ -312,7 +402,7 @@
 
     // ========== PLANNER: Mouse Interaction ==========
     let isPanning = false, panStartX = 0, panStartY = 0, panCamStartX = 0, panCamStartY = 0;
-    let dragTarget = null; // { type: 'box-move'|'box-resize'|'vertex', ... }
+    let dragTarget = null;
     let addBoxStart = null;
     let hoverVertex = -1;
 
@@ -321,7 +411,6 @@
       const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
       const factor = e.deltaY > 0 ? 0.85 : 1.18;
       zoom = Math.max(0.2, Math.min(20, zoom * factor));
-      // Keep world point under cursor
       camX = wx - (e.offsetX - canvas.width / 2) / zoom;
       camY = wy - (e.offsetY - canvas.height / 2) / zoom;
       dirty = true;
@@ -331,7 +420,6 @@
       const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
       const swx = snap(wx), swy = snap(wy);
 
-      // Middle button or shift+left = pan
       if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
         isPanning = true;
         panStartX = e.offsetX; panStartY = e.offsetY;
@@ -372,7 +460,6 @@
         return;
       }
 
-      // idle mode: select/drag boxes
       const handle = findResizeHandle(e.offsetX, e.offsetY);
       if (handle) {
         dragTarget = handle;
@@ -421,18 +508,12 @@
         return;
       }
 
-      if (toolMode === 'add-box' && addBoxStart) {
-        dirty = true; // redraw rubber band
-        return;
-      }
-
-      // Hover detection for edit mode
       if (toolMode === 'edit-drawer') {
         const vi = findVertexAt(e.offsetX, e.offsetY);
         if (vi !== hoverVertex) { hoverVertex = vi; dirty = true; }
       }
 
-      dirty = true; // for cursor position display
+      dirty = true;
     });
 
     canvas.addEventListener('mouseup', e => {
@@ -465,7 +546,6 @@
           appState.drawer.points.splice(vi, 1);
           dirty = true;
         } else {
-          // Add point on nearest edge
           const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
           const insertIdx = findNearestEdge(wx, wy);
           if (insertIdx >= 0) {
@@ -523,7 +603,6 @@
     }
 
     function findBoxAt(wx, wy) {
-      // Search in reverse order (top-most first)
       for (let i = appState.boxes.length - 1; i >= 0; i--) {
         const b = appState.boxes[i];
         if (wx >= b.x && wx <= b.x + b.width && wy >= b.y && wy <= b.y + b.depth) return b.id;
@@ -689,7 +768,7 @@
       if (pts.length < 2) { document.getElementById('drawerDims').textContent = ''; return; }
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
       for (const [x, y] of pts) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
-      document.getElementById('drawerDims').textContent = `Bounding box: ${Math.round(maxX - minX)} x ${Math.round(maxY - minY)} mm`;
+      document.getElementById('drawerDims').textContent = `${t('boundingBox')}: ${Math.round(maxX - minX)} x ${Math.round(maxY - minY)} mm`;
     }
 
     function readGlobalParams() {
@@ -714,14 +793,11 @@
       drawRubberBand();
       updateDrawerDims();
 
-      // Info
-      const [wx, wy] = screenToWorld(canvas.width / 2, canvas.height / 2);
       document.getElementById('plannerInfo').textContent =
-        `Zoom: ${zoom.toFixed(1)}x | Pudelka: ${appState.boxes.length}`;
+        `Zoom: ${zoom.toFixed(1)}x | ${t('zoomBoxes')}: ${appState.boxes.length}`;
     }
 
     function drawGrid() {
-      // Pick grid spacing based on zoom
       let gridStep = 1;
       const steps = [1, 2, 5, 10, 20, 50, 100, 200, 500];
       for (const s of steps) { if (s * zoom >= 10) { gridStep = s; break; } }
@@ -744,7 +820,6 @@
       }
       ctx.stroke();
 
-      // Major grid (10x)
       const majorStep = gridStep * 10;
       const startMX = Math.floor(x0 / majorStep) * majorStep;
       const startMY = Math.floor(y0 / majorStep) * majorStep;
@@ -761,7 +836,6 @@
       }
       ctx.stroke();
 
-      // Origin cross
       const [ox, oy] = worldToScreen(0, 0);
       ctx.strokeStyle = '#555';
       ctx.lineWidth = 1;
@@ -792,7 +866,6 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Vertices
       for (let i = 0; i < pts.length; i++) {
         const [vx, vy] = worldToScreen(pts[i][0], pts[i][1]);
         ctx.beginPath();
@@ -801,7 +874,6 @@
         ctx.fill();
       }
 
-      // Dimension labels on edges
       if (appState.drawer.closed) {
         ctx.font = '10px monospace';
         ctx.fillStyle = '#666';
@@ -823,16 +895,13 @@
         const color = BOX_COLORS[i % BOX_COLORS.length];
         const isSelected = box.id === appState.selectedBoxId;
 
-        // Fill
         ctx.fillStyle = color + '30';
         ctx.fillRect(sx, sy, sw, sd);
 
-        // Border
         ctx.strokeStyle = isSelected ? '#fff' : color;
         ctx.lineWidth = isSelected ? 2.5 : 1.5;
         ctx.strokeRect(sx, sy, sw, sd);
 
-        // Overlap/out-of-bounds warning
         const hasOverlap = appState.boxes.some(other =>
           other.id !== box.id && boxesOverlap(box, other));
         const outOfBounds = appState.drawer.closed && !boxInsideDrawer(box);
@@ -863,7 +932,6 @@
           }
         }
 
-        // Label
         if (sw > 30 && sd > 20) {
           ctx.font = '11px system-ui';
           ctx.fillStyle = '#ddd';
@@ -872,13 +940,12 @@
           ctx.textAlign = 'left';
         }
 
-        // Resize handles (selected only)
         if (isSelected) {
           const handles = [
-            [sx + sw, sy + sd / 2], // right
-            [sx + sw / 2, sy + sd], // bottom
-            [sx, sy + sd / 2],       // left
-            [sx + sw / 2, sy],       // top
+            [sx + sw, sy + sd / 2],
+            [sx + sw / 2, sy + sd],
+            [sx, sy + sd / 2],
+            [sx + sw / 2, sy],
           ];
           ctx.fillStyle = '#e94560';
           for (const [hx, hy] of handles) {
@@ -888,17 +955,7 @@
       });
     }
 
-    function drawRubberBand() {
-      if (toolMode === 'add-box' && addBoxStart) {
-        const [sx0, sy0] = worldToScreen(addBoxStart[0], addBoxStart[1]);
-        // Use last mouse pos from canvas (approximate via cursor tracking)
-        ctx.strokeStyle = '#e94560';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-        // We'll track mouse pos separately for rubber band
-        ctx.setLineDash([]);
-      }
-    }
+    function drawRubberBand() {}
 
     function boxesOverlap(a, b) {
       return a.x < b.x + b.width && a.x + a.width > b.x &&
@@ -937,13 +994,11 @@
     });
     document.getElementById('btnDeleteBox').addEventListener('click', deleteSelectedBox);
 
-    // Selected box panel inputs
     ['sbX','sbY','sbW','sbD','sbH','sbR','sbHoleDia','sbHoleSpac'].forEach(id => {
       document.getElementById(id).addEventListener('input', readSelBoxPanel);
     });
     document.getElementById('sbDrain').addEventListener('change', readSelBoxPanel);
 
-    // Global params
     ['gBoxHeight','gWall','gBase','gGap','gSnap'].forEach(id => {
       document.getElementById(id).addEventListener('input', readGlobalParams);
     });
@@ -983,7 +1038,6 @@
       edScene.add(b);
       edScene.add(new THREE.GridHelper(300, 30, 0x333355, 0x252545));
 
-      // Fill editor from selected box or defaults
       loadBoxToEditor();
       updateEditorPreview();
 
@@ -1005,7 +1059,7 @@
       edRenderer.setSize(w, h);
     }
 
-    // ========== EDITOR: Geometry (reused from original) ==========
+    // ========== EDITOR: Geometry ==========
     const edMaterial = new THREE.MeshStandardMaterial({ color: 0xff6b35, roughness: 0.6, metalness: 0.05 });
 
     function drawRoundedRect(target, w, d, r) {
@@ -1134,7 +1188,7 @@
         const tc = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
         document.getElementById('edInfo').textContent = `${params.width} x ${params.depth} x ${params.height} mm | ${Math.round(tc)} tri`;
       } else {
-        document.getElementById('edInfo').textContent = 'Invalid parameters';
+        document.getElementById('edInfo').textContent = t('invalidParams');
       }
     }
 
@@ -1222,26 +1276,23 @@
       reader.onload = ev => {
         try {
           const data = JSON.parse(ev.target.result);
-          if (data.version !== 1) { alert('Nieobslugiwana wersja pliku'); return; }
+          if (data.version !== 1) { alert(t('unsupportedVersion')); return; }
           appState.drawer = data.drawer || { points: [], closed: false };
           appState.globalParams = { ...appState.globalParams, ...data.globalParams };
           appState.boxes = data.boxes || [];
           appState.selectedBoxId = null;
-          // Update nextBoxId
           let maxId = 0;
           appState.boxes.forEach(b => {
             const num = parseInt(b.id.replace('box-', ''));
             if (num > maxId) maxId = num;
           });
           nextBoxId = maxId + 1;
-          // Update UI
           document.getElementById('gBoxHeight').value = appState.globalParams.boxHeight;
           document.getElementById('gWall').value = appState.globalParams.wallThickness;
           document.getElementById('gBase').value = appState.globalParams.baseThickness;
           document.getElementById('gGap').value = appState.globalParams.gap;
           document.getElementById('gSnap').value = appState.globalParams.snapGrid;
           updateBoxList(); updateSelBoxPanel();
-          // Center view on drawer
           if (appState.drawer.points.length > 0) {
             let cx = 0, cy = 0;
             appState.drawer.points.forEach(([x, y]) => { cx += x; cy += y; });
@@ -1249,7 +1300,7 @@
             camX = cx; camY = cy;
           }
           dirty = true;
-        } catch (err) { alert('Blad wczytywania: ' + err.message); }
+        } catch (err) { alert(t('loadError') + ': ' + err.message); }
       };
       reader.readAsText(file);
       e.target.value = '';
@@ -1295,6 +1346,7 @@
     }
 
     // ========== INIT ==========
+    applyTranslations();
     updateToolButtons();
     updateBoxList();
     plannerLoop();
