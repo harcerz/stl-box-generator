@@ -6,145 +6,231 @@
   <title>Box Generator - STL</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { display: flex; height: 100vh; font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #e0e0e0; overflow: hidden; }
+    body { display: flex; flex-direction: column; height: 100vh; font-family: system-ui, -apple-system, sans-serif; background: #1a1a2e; color: #e0e0e0; overflow: hidden; }
 
+    /* --- Navbar --- */
+    .navbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 20px; height: 44px; min-height: 44px;
+      background: #0f3460; border-bottom: 1px solid #533483;
+    }
+    .nav-title { font-size: 16px; font-weight: 700; color: #e94560; }
+    .nav-brand { margin-left: auto; font-size: 13px; color: #888; text-decoration: none; font-weight: 600; }
+    .nav-brand:hover { color: #e94560; }
+    .nav-tabs { display: flex; gap: 4px; }
+    .nav-tab {
+      padding: 6px 16px; border: none; border-radius: 4px 4px 0 0;
+      background: transparent; color: #888; font-size: 13px; cursor: pointer;
+      font-weight: 600; transition: all 0.15s;
+    }
+    .nav-tab:hover { color: #ccc; }
+    .nav-tab.active { background: #1a1a2e; color: #e0e0e0; }
+
+    /* --- Views --- */
+    .view { display: none; flex: 1; overflow: hidden; }
+    .view.active { display: flex; }
+
+    /* --- Shared Controls Panel --- */
     .controls {
       width: 320px; min-width: 320px;
-      padding: 20px;
+      padding: 16px;
       background: #16213e;
       overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
+      display: flex; flex-direction: column; gap: 14px;
       border-right: 1px solid #0f3460;
     }
-
-    .controls h1 { font-size: 20px; text-align: center; color: #e94560; }
-
-    .param-group { display: flex; flex-direction: column; gap: 8px; }
+    .controls h2 { font-size: 16px; color: #e94560; margin-bottom: 2px; }
+    .param-group { display: flex; flex-direction: column; gap: 7px; }
     .param-group h3 {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #888;
-      border-bottom: 1px solid #0f3460;
-      padding-bottom: 4px;
-      margin-bottom: 2px;
+      font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+      color: #888; border-bottom: 1px solid #0f3460; padding-bottom: 4px; margin-bottom: 1px;
     }
-
-    label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      gap: 8px;
-    }
-
+    label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 8px; }
     .unit { display: flex; align-items: center; gap: 4px; }
-
     input[type="number"] {
-      width: 72px;
-      padding: 5px 8px;
-      background: #0f3460;
-      border: 1px solid #533483;
-      color: #eee;
-      border-radius: 4px;
-      font-size: 14px;
-      text-align: right;
+      width: 68px; padding: 4px 6px; background: #0f3460; border: 1px solid #533483;
+      color: #eee; border-radius: 4px; font-size: 13px; text-align: right;
     }
     input[type="number"]:focus { outline: none; border-color: #e94560; }
     input[type="number"].invalid { border-color: #e94560; background: #3d1225; }
-
-    input[type="checkbox"] { width: 18px; height: 18px; accent-color: #e94560; cursor: pointer; }
-
-    .drain-options {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      padding-left: 14px;
-      border-left: 2px solid #533483;
-      margin-top: 4px;
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: #e94560; cursor: pointer; }
+    .sub-options {
+      display: none; flex-direction: column; gap: 7px;
+      padding-left: 12px; border-left: 2px solid #533483; margin-top: 3px;
     }
-    .drain-options.visible { display: flex; }
+    .sub-options.visible { display: flex; }
 
-    button#exportBtn {
-      padding: 14px;
-      background: #e94560;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      transition: background 0.2s;
-      margin-top: auto;
+    /* --- Buttons --- */
+    .btn {
+      padding: 8px 12px; border: none; border-radius: 5px;
+      font-size: 13px; cursor: pointer; font-weight: 600; transition: background 0.15s;
     }
-    button#exportBtn:hover { background: #d63851; }
-    button#exportBtn:active { background: #c02e45; }
+    .btn-primary { background: #e94560; color: white; }
+    .btn-primary:hover { background: #d63851; }
+    .btn-secondary { background: #533483; color: white; }
+    .btn-secondary:hover { background: #6b44a0; }
+    .btn-danger { background: #8b0000; color: white; }
+    .btn-danger:hover { background: #a50000; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-block { width: 100%; }
+    .btn-group { display: flex; gap: 6px; }
+    .btn-group .btn { flex: 1; }
+    .btn.active { outline: 2px solid #e94560; outline-offset: 1px; }
 
+    /* --- Planner specific --- */
+    .canvas-container { flex: 1; position: relative; }
+    .canvas-container canvas { display: block; width: 100%; height: 100%; }
+    .selected-box-panel { display: none; flex-direction: column; gap: 7px; }
+    .selected-box-panel.visible { display: flex; }
+    .box-list { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
+    .box-list-item {
+      display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+      background: #0f3460; border-radius: 3px; font-size: 12px; cursor: pointer;
+    }
+    .box-list-item:hover { background: #1a4080; }
+    .box-list-item.selected { outline: 1px solid #e94560; }
+    .box-list-item .color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .auto-split-row { display: flex; gap: 6px; align-items: center; }
+    .auto-split-row input { width: 48px; }
+    .auto-split-row span { color: #888; }
+
+    /* --- Editor specific --- */
     #viewport { flex: 1; position: relative; }
     #viewport canvas { display: block; }
-
-    .info {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      font-size: 12px;
-      color: #666;
-      font-family: monospace;
-    }
-
-    .error-msg {
-      color: #e94560;
-      font-size: 12px;
-      display: none;
-    }
+    .info { position: absolute; bottom: 10px; left: 10px; font-size: 11px; color: #666; font-family: monospace; }
+    .error-msg { color: #e94560; font-size: 12px; display: none; }
     .error-msg.visible { display: block; }
 
     @media (max-width: 700px) {
-      body { flex-direction: column; }
+      .view { flex-direction: column; }
       .controls { width: 100%; min-width: unset; max-height: 40vh; }
     }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <h1>Box Generator</h1>
 
-    <div class="param-group">
-      <h3>Wymiary zewnetrzne</h3>
-      <label>Szerokosc (X) <span class="unit"><input type="number" id="width" value="100" min="5" step="1"> mm</span></label>
-      <label>Glebokosc (Y) <span class="unit"><input type="number" id="depth" value="100" min="5" step="1"> mm</span></label>
-      <label>Wysokosc (Z) <span class="unit"><input type="number" id="height" value="50" min="3" step="1"> mm</span></label>
+  <nav class="navbar">
+    <span class="nav-title">Box Generator</span>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="planner">Planner</button>
+      <button class="nav-tab" data-view="editor">Box Editor</button>
     </div>
+    <a class="nav-brand" href="https://sych.pl" target="_blank">sych.pl</a>
+  </nav>
 
-    <div class="param-group">
-      <h3>Scianki</h3>
-      <label>Grubosc scianek <span class="unit"><input type="number" id="wallThickness" value="2" min="0.4" step="0.2"> mm</span></label>
-      <label>Grubosc podstawy <span class="unit"><input type="number" id="baseThickness" value="2" min="0.4" step="0.2"> mm</span></label>
-    </div>
-
-    <div class="param-group">
-      <h3>Narozniki</h3>
-      <label>Promien zaokraglenia <span class="unit"><input type="number" id="cornerRadius" value="0" min="0" step="1"> mm</span></label>
-    </div>
-
-    <div class="param-group">
-      <h3>Otwory odplywowe</h3>
-      <label>Wlacz otwory <input type="checkbox" id="drainEnabled"></label>
-      <div class="drain-options" id="drainOptions">
-        <label>Srednica otworu <span class="unit"><input type="number" id="holeDiameter" value="3" min="1" step="0.5"> mm</span></label>
-        <label>Odstep otworow <span class="unit"><input type="number" id="holeSpacing" value="14" min="3" step="1"> mm</span></label>
+  <!-- ==================== PLANNER VIEW ==================== -->
+  <div id="view-planner" class="view active">
+    <div class="controls">
+      <div class="param-group">
+        <h3>Szuflada</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" id="btnDrawDrawer">Rysuj</button>
+          <button class="btn btn-secondary btn-sm" id="btnEditDrawer">Edytuj</button>
+          <button class="btn btn-danger btn-sm" id="btnClearDrawer">Wyczysc</button>
+        </div>
+        <div style="font-size:11px;color:#888" id="drawerDims"></div>
       </div>
-      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="param-group">
+        <h3>Pudelka</h3>
+        <div class="auto-split-row">
+          <input type="number" id="splitCols" value="3" min="1" max="20">
+          <span>x</span>
+          <input type="number" id="splitRows" value="2" min="1" max="20">
+          <button class="btn btn-secondary btn-sm" id="btnAutoSplit">Podziel</button>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-block" id="btnAddBox">Dodaj pudelko</button>
+        <div class="box-list" id="boxList"></div>
+      </div>
+
+      <div class="param-group">
+        <h3>Globalne parametry</h3>
+        <label>Wysokosc pudelek <span class="unit"><input type="number" id="gBoxHeight" value="50" min="3" step="1"> mm</span></label>
+        <label>Grubosc scianek <span class="unit"><input type="number" id="gWall" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label>Grubosc podstawy <span class="unit"><input type="number" id="gBase" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label>Luz (gap) <span class="unit"><input type="number" id="gGap" value="0.3" min="0" step="0.1"> mm</span></label>
+        <label>Snap siatki <span class="unit"><input type="number" id="gSnap" value="5" min="1" step="1"> mm</span></label>
+      </div>
+
+      <div class="param-group selected-box-panel" id="selBoxPanel">
+        <h3>Wybrane pudelko</h3>
+        <label>Pozycja X <span class="unit"><input type="number" id="sbX" step="1"> mm</span></label>
+        <label>Pozycja Y <span class="unit"><input type="number" id="sbY" step="1"> mm</span></label>
+        <label>Szerokosc <span class="unit"><input type="number" id="sbW" min="5" step="1"> mm</span></label>
+        <label>Glebokosc <span class="unit"><input type="number" id="sbD" min="5" step="1"> mm</span></label>
+        <label>Wysokosc <span class="unit"><input type="number" id="sbH" placeholder="glob." step="1"> mm</span></label>
+        <label>Zaokraglenie <span class="unit"><input type="number" id="sbR" value="0" min="0" step="1"> mm</span></label>
+        <label>Otwory <input type="checkbox" id="sbDrain"></label>
+        <div class="sub-options" id="sbDrainOpts">
+          <label>Srednica <span class="unit"><input type="number" id="sbHoleDia" value="3" min="1" step="0.5"> mm</span></label>
+          <label>Odstep <span class="unit"><input type="number" id="sbHoleSpac" value="14" min="3" step="1"> mm</span></label>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" id="btnEditBox3D">Edytuj 3D</button>
+          <button class="btn btn-primary btn-sm" id="btnBoxSTL">Pobierz STL</button>
+        </div>
+        <button class="btn btn-danger btn-sm btn-block" id="btnDeleteBox">Usun pudelko</button>
+      </div>
+
+      <div class="param-group" style="margin-top:auto">
+        <h3>Konfiguracja</h3>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" id="btnSaveJSON">Zapisz JSON</button>
+          <button class="btn btn-secondary btn-sm" id="btnLoadJSON">Wczytaj JSON</button>
+        </div>
+        <input type="file" id="fileInput" accept=".json" style="display:none">
+        <button class="btn btn-primary btn-block" id="btnExportZIP">Pobierz wszystkie STL (ZIP)</button>
+      </div>
     </div>
 
-    <button id="exportBtn">Pobierz STL</button>
+    <div class="canvas-container" id="plannerContainer">
+      <canvas id="plannerCanvas"></canvas>
+      <div class="info" id="plannerInfo">Kliknij "Rysuj" i narysuj ksztalt szuflady</div>
+    </div>
   </div>
 
-  <div id="viewport">
-    <div class="info" id="info"></div>
+  <!-- ==================== EDITOR VIEW ==================== -->
+  <div id="view-editor" class="view">
+    <div class="controls">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+        <button class="btn btn-secondary btn-sm" id="btnBackToPlanner">&larr; Planner</button>
+        <h2>Box Editor</h2>
+      </div>
+
+      <div class="param-group">
+        <h3>Wymiary zewnetrzne</h3>
+        <label>Szerokosc (X) <span class="unit"><input type="number" id="edWidth" value="100" min="5" step="1"> mm</span></label>
+        <label>Glebokosc (Y) <span class="unit"><input type="number" id="edDepth" value="100" min="5" step="1"> mm</span></label>
+        <label>Wysokosc (Z) <span class="unit"><input type="number" id="edHeight" value="50" min="3" step="1"> mm</span></label>
+      </div>
+
+      <div class="param-group">
+        <h3>Scianki</h3>
+        <label>Grubosc scianek <span class="unit"><input type="number" id="edWall" value="2" min="0.4" step="0.2"> mm</span></label>
+        <label>Grubosc podstawy <span class="unit"><input type="number" id="edBase" value="2" min="0.4" step="0.2"> mm</span></label>
+      </div>
+
+      <div class="param-group">
+        <h3>Narozniki</h3>
+        <label>Promien zaokraglenia <span class="unit"><input type="number" id="edRadius" value="0" min="0" step="1"> mm</span></label>
+      </div>
+
+      <div class="param-group">
+        <h3>Otwory odplywowe</h3>
+        <label>Wlacz otwory <input type="checkbox" id="edDrain"></label>
+        <div class="sub-options" id="edDrainOpts">
+          <label>Srednica otworu <span class="unit"><input type="number" id="edHoleDia" value="3" min="1" step="0.5"> mm</span></label>
+          <label>Odstep otworow <span class="unit"><input type="number" id="edHoleSpac" value="14" min="3" step="1"> mm</span></label>
+        </div>
+        <div class="error-msg" id="edError"></div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="edExportBtn" style="margin-top:auto">Pobierz STL</button>
+    </div>
+
+    <div id="viewport">
+      <div class="info" id="edInfo"></div>
+    </div>
   </div>
 
   <script type="importmap">
@@ -155,6 +241,7 @@
     }
   }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <script type="module">
     import * as THREE from 'three';
@@ -162,59 +249,768 @@
     import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
     import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
-    // --- DOM refs ---
-    const viewport = document.getElementById('viewport');
-    const infoEl = document.getElementById('info');
-    const errorEl = document.getElementById('errorMsg');
-    const drainCheck = document.getElementById('drainEnabled');
-    const drainOpts = document.getElementById('drainOptions');
+    // ========== CONSTANTS ==========
+    const BOX_COLORS = ['#ff6b35','#4ecdc4','#45b7d1','#96ceb4','#ffeead','#ff6f69','#88d8b0','#c9b1ff'];
+    let nextBoxId = 1;
 
-    // --- Three.js setup ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a2e);
+    // ========== APP STATE ==========
+    const appState = {
+      drawer: { points: [], closed: false },
+      globalParams: { boxHeight: 50, wallThickness: 2, baseThickness: 2, gap: 0.3, snapGrid: 5 },
+      boxes: [],
+      selectedBoxId: null,
+      editingBoxId: null, // box being edited in 3D editor
+    };
 
-    const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 10000);
-    camera.position.set(180, 160, 180);
+    let toolMode = 'idle'; // idle | draw-drawer | edit-drawer | add-box
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    viewport.appendChild(renderer.domElement);
+    // ========== VIEW SWITCHING ==========
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const views = { planner: document.getElementById('view-planner'), editor: document.getElementById('view-editor') };
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.target.set(0, 25, 0);
-    controls.update();
+    function switchView(name) {
+      navTabs.forEach(t => t.classList.toggle('active', t.dataset.view === name));
+      Object.entries(views).forEach(([k, v]) => v.classList.toggle('active', k === name));
+      if (name === 'editor') initEditor();
+      if (name === 'planner') { syncEditorBack(); resizeCanvas(); updateSelBoxPanel(); updateBoxList(); dirty = true; }
+    }
+    navTabs.forEach(t => t.addEventListener('click', () => switchView(t.dataset.view)));
+    document.getElementById('btnBackToPlanner').addEventListener('click', () => switchView('planner'));
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-    dirLight.position.set(150, 250, 100);
-    scene.add(dirLight);
-    const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    backLight.position.set(-100, 100, -150);
-    scene.add(backLight);
+    // ========== PLANNER: Canvas 2D Setup ==========
+    const canvas = document.getElementById('plannerCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('plannerContainer');
 
-    // Grid
-    const grid = new THREE.GridHelper(300, 30, 0x333355, 0x252545);
-    scene.add(grid);
+    let camX = 0, camY = 0, zoom = 2; // 1 unit = 1mm, zoom=2 → 2px per mm
+    let dirty = true;
 
-    // Box material
-    const boxMaterial = new THREE.MeshStandardMaterial({
-      color: 0xff6b35,
-      roughness: 0.6,
-      metalness: 0.05,
+    function resizeCanvas() {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      dirty = true;
+    }
+    window.addEventListener('resize', () => { resizeCanvas(); resizeEditor(); });
+    resizeCanvas();
+
+    function worldToScreen(wx, wy) {
+      return [
+        (wx - camX) * zoom + canvas.width / 2,
+        (wy - camY) * zoom + canvas.height / 2
+      ];
+    }
+    function screenToWorld(sx, sy) {
+      return [
+        (sx - canvas.width / 2) / zoom + camX,
+        (sy - canvas.height / 2) / zoom + camY
+      ];
+    }
+    function snap(val) {
+      const s = appState.globalParams.snapGrid;
+      return Math.round(val / s) * s;
+    }
+
+    // ========== PLANNER: Mouse Interaction ==========
+    let isPanning = false, panStartX = 0, panStartY = 0, panCamStartX = 0, panCamStartY = 0;
+    let dragTarget = null; // { type: 'box-move'|'box-resize'|'vertex', ... }
+    let addBoxStart = null;
+    let hoverVertex = -1;
+
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
+      const factor = e.deltaY > 0 ? 0.85 : 1.18;
+      zoom = Math.max(0.2, Math.min(20, zoom * factor));
+      // Keep world point under cursor
+      camX = wx - (e.offsetX - canvas.width / 2) / zoom;
+      camY = wy - (e.offsetY - canvas.height / 2) / zoom;
+      dirty = true;
+    }, { passive: false });
+
+    canvas.addEventListener('mousedown', e => {
+      const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
+      const swx = snap(wx), swy = snap(wy);
+
+      // Middle button or shift+left = pan
+      if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+        isPanning = true;
+        panStartX = e.offsetX; panStartY = e.offsetY;
+        panCamStartX = camX; panCamStartY = camY;
+        return;
+      }
+
+      if (e.button !== 0) return;
+
+      if (toolMode === 'draw-drawer') {
+        const pts = appState.drawer.points;
+        if (pts.length >= 3) {
+          const [fx, fy] = worldToScreen(pts[0][0], pts[0][1]);
+          if (Math.hypot(e.offsetX - fx, e.offsetY - fy) < 12) {
+            appState.drawer.closed = true;
+            toolMode = 'idle';
+            updateToolButtons();
+            dirty = true;
+            return;
+          }
+        }
+        pts.push([swx, swy]);
+        dirty = true;
+        return;
+      }
+
+      if (toolMode === 'edit-drawer') {
+        const vi = findVertexAt(e.offsetX, e.offsetY);
+        if (vi >= 0) {
+          dragTarget = { type: 'vertex', index: vi };
+          return;
+        }
+        return;
+      }
+
+      if (toolMode === 'add-box') {
+        addBoxStart = [swx, swy];
+        return;
+      }
+
+      // idle mode: select/drag boxes
+      const handle = findResizeHandle(e.offsetX, e.offsetY);
+      if (handle) {
+        dragTarget = handle;
+        return;
+      }
+      const boxId = findBoxAt(wx, wy);
+      selectBox(boxId);
+      if (boxId) {
+        const box = appState.boxes.find(b => b.id === boxId);
+        dragTarget = { type: 'box-move', id: boxId, startWX: wx, startWY: wy, origX: box.x, origY: box.y };
+      }
     });
 
-    let boxMesh = null;
+    canvas.addEventListener('mousemove', e => {
+      if (isPanning) {
+        const dx = (e.offsetX - panStartX) / zoom;
+        const dy = (e.offsetY - panStartY) / zoom;
+        camX = panCamStartX - dx;
+        camY = panCamStartY - dy;
+        dirty = true;
+        return;
+      }
 
-    // --- Geometry helpers ---
+      if (dragTarget) {
+        const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
+        const swx = snap(wx), swy = snap(wy);
+
+        if (dragTarget.type === 'vertex') {
+          appState.drawer.points[dragTarget.index] = [swx, swy];
+          dirty = true;
+        } else if (dragTarget.type === 'box-move') {
+          const box = appState.boxes.find(b => b.id === dragTarget.id);
+          box.x = snap(dragTarget.origX + (wx - dragTarget.startWX));
+          box.y = snap(dragTarget.origY + (wy - dragTarget.startWY));
+          dirty = true;
+          updateSelBoxPanel();
+        } else if (dragTarget.type === 'box-resize') {
+          const box = appState.boxes.find(b => b.id === dragTarget.id);
+          if (dragTarget.edge === 'right') box.width = Math.max(5, snap(swx - box.x));
+          if (dragTarget.edge === 'bottom') box.depth = Math.max(5, snap(swy - box.y));
+          if (dragTarget.edge === 'left') { const r = box.x + box.width; box.x = Math.min(swx, r - 5); box.width = r - box.x; }
+          if (dragTarget.edge === 'top') { const b = box.y + box.depth; box.y = Math.min(swy, b - 5); box.depth = b - box.y; }
+          dirty = true;
+          updateSelBoxPanel();
+        }
+        return;
+      }
+
+      if (toolMode === 'add-box' && addBoxStart) {
+        dirty = true; // redraw rubber band
+        return;
+      }
+
+      // Hover detection for edit mode
+      if (toolMode === 'edit-drawer') {
+        const vi = findVertexAt(e.offsetX, e.offsetY);
+        if (vi !== hoverVertex) { hoverVertex = vi; dirty = true; }
+      }
+
+      dirty = true; // for cursor position display
+    });
+
+    canvas.addEventListener('mouseup', e => {
+      if (isPanning) { isPanning = false; return; }
+
+      if (toolMode === 'add-box' && addBoxStart) {
+        const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
+        const swx = snap(wx), swy = snap(wy);
+        const x = Math.min(addBoxStart[0], swx), y = Math.min(addBoxStart[1], swy);
+        const w = Math.abs(swx - addBoxStart[0]), d = Math.abs(swy - addBoxStart[1]);
+        if (w >= 5 && d >= 5) {
+          appState.boxes.push(createBox(x, y, w, d));
+          updateBoxList();
+        }
+        addBoxStart = null;
+        toolMode = 'idle';
+        updateToolButtons();
+        dirty = true;
+        return;
+      }
+
+      dragTarget = null;
+    });
+
+    canvas.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      if (toolMode === 'edit-drawer') {
+        const vi = findVertexAt(e.offsetX, e.offsetY);
+        if (vi >= 0 && appState.drawer.points.length > 3) {
+          appState.drawer.points.splice(vi, 1);
+          dirty = true;
+        } else {
+          // Add point on nearest edge
+          const [wx, wy] = screenToWorld(e.offsetX, e.offsetY);
+          const insertIdx = findNearestEdge(wx, wy);
+          if (insertIdx >= 0) {
+            appState.drawer.points.splice(insertIdx + 1, 0, [snap(wx), snap(wy)]);
+            dirty = true;
+          }
+        }
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (toolMode === 'draw-drawer') {
+          appState.drawer.points = [];
+          appState.drawer.closed = false;
+        }
+        toolMode = 'idle';
+        addBoxStart = null;
+        updateToolButtons();
+        dirty = true;
+      }
+      if (e.key === 'Delete' && appState.selectedBoxId && toolMode === 'idle') {
+        deleteSelectedBox();
+      }
+    });
+
+    // ========== PLANNER: Hit Testing ==========
+    function findVertexAt(sx, sy) {
+      const pts = appState.drawer.points;
+      for (let i = 0; i < pts.length; i++) {
+        const [vx, vy] = worldToScreen(pts[i][0], pts[i][1]);
+        if (Math.hypot(sx - vx, sy - vy) < 8) return i;
+      }
+      return -1;
+    }
+
+    function findNearestEdge(wx, wy) {
+      const pts = appState.drawer.points;
+      let bestDist = Infinity, bestIdx = -1;
+      for (let i = 0; i < pts.length; i++) {
+        const j = (i + 1) % pts.length;
+        const d = distToSegment(wx, wy, pts[i][0], pts[i][1], pts[j][0], pts[j][1]);
+        if (d < bestDist && d < 10 / zoom) { bestDist = d; bestIdx = i; }
+      }
+      return bestIdx;
+    }
+
+    function distToSegment(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const len2 = dx * dx + dy * dy;
+      if (len2 === 0) return Math.hypot(px - x1, py - y1);
+      let t = ((px - x1) * dx + (py - y1) * dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+    }
+
+    function findBoxAt(wx, wy) {
+      // Search in reverse order (top-most first)
+      for (let i = appState.boxes.length - 1; i >= 0; i--) {
+        const b = appState.boxes[i];
+        if (wx >= b.x && wx <= b.x + b.width && wy >= b.y && wy <= b.y + b.depth) return b.id;
+      }
+      return null;
+    }
+
+    function findResizeHandle(sx, sy) {
+      if (!appState.selectedBoxId) return null;
+      const box = appState.boxes.find(b => b.id === appState.selectedBoxId);
+      if (!box) return null;
+      const edges = [
+        { edge: 'right', x: box.x + box.width, y1: box.y, y2: box.y + box.depth },
+        { edge: 'bottom', y: box.y + box.depth, x1: box.x, x2: box.x + box.width },
+        { edge: 'left', x: box.x, y1: box.y, y2: box.y + box.depth },
+        { edge: 'top', y: box.y, x1: box.x, x2: box.x + box.width },
+      ];
+      for (const e of edges) {
+        if (e.x !== undefined) {
+          const [esx] = worldToScreen(e.x, 0);
+          const [, sy1] = worldToScreen(0, e.y1);
+          const [, sy2] = worldToScreen(0, e.y2);
+          if (Math.abs(sx - esx) < 6 && sy >= Math.min(sy1, sy2) - 4 && sy <= Math.max(sy1, sy2) + 4) {
+            return { type: 'box-resize', id: box.id, edge: e.edge };
+          }
+        } else {
+          const [, esy] = worldToScreen(0, e.y);
+          const [sx1] = worldToScreen(e.x1, 0);
+          const [sx2] = worldToScreen(e.x2, 0);
+          if (Math.abs(sy - esy) < 6 && sx >= Math.min(sx1, sx2) - 4 && sx <= Math.max(sx1, sx2) + 4) {
+            return { type: 'box-resize', id: box.id, edge: e.edge };
+          }
+        }
+      }
+      return null;
+    }
+
+    // ========== PLANNER: Point in Polygon ==========
+    function pointInPolygon(x, y, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+      }
+      return inside;
+    }
+
+    // ========== PLANNER: Box Management ==========
+    function createBox(x, y, w, d) {
+      return {
+        id: `box-${nextBoxId++}`, x, y, width: w, depth: d,
+        boxHeight: null, cornerRadius: 0,
+        drainEnabled: false, holeDiameter: 3, holeSpacing: 14,
+      };
+    }
+
+    function selectBox(id) {
+      appState.selectedBoxId = id;
+      updateSelBoxPanel();
+      updateBoxList();
+      dirty = true;
+    }
+
+    function deleteSelectedBox() {
+      appState.boxes = appState.boxes.filter(b => b.id !== appState.selectedBoxId);
+      appState.selectedBoxId = null;
+      updateSelBoxPanel();
+      updateBoxList();
+      dirty = true;
+    }
+
+    // ========== PLANNER: Auto-Split ==========
+    function autoSplit() {
+      if (!appState.drawer.closed) return;
+      const pts = appState.drawer.points;
+      const cols = parseInt(document.getElementById('splitCols').value) || 3;
+      const rows = parseInt(document.getElementById('splitRows').value) || 2;
+      const gap = appState.globalParams.gap;
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const [x, y] of pts) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
+
+      const totalW = maxX - minX;
+      const totalH = maxY - minY;
+      const cellW = (totalW - gap * (cols - 1)) / cols;
+      const cellH = (totalH - gap * (rows - 1)) / rows;
+
+      if (cellW < 5 || cellH < 5) return;
+
+      appState.boxes = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = minX + c * (cellW + gap);
+          const y = minY + r * (cellH + gap);
+          const corners = [[x, y], [x + cellW, y], [x + cellW, y + cellH], [x, y + cellH]];
+          if (corners.every(([px, py]) => pointInPolygon(px, py, pts))) {
+            appState.boxes.push(createBox(x, y, cellW, cellH));
+          }
+        }
+      }
+      appState.selectedBoxId = null;
+      updateSelBoxPanel();
+      updateBoxList();
+      dirty = true;
+    }
+
+    // ========== PLANNER: UI Updates ==========
+    function updateToolButtons() {
+      document.getElementById('btnDrawDrawer').classList.toggle('active', toolMode === 'draw-drawer');
+      document.getElementById('btnEditDrawer').classList.toggle('active', toolMode === 'edit-drawer');
+      document.getElementById('btnAddBox').classList.toggle('active', toolMode === 'add-box');
+    }
+
+    function updateBoxList() {
+      const list = document.getElementById('boxList');
+      list.innerHTML = '';
+      appState.boxes.forEach((b, i) => {
+        const el = document.createElement('div');
+        el.className = 'box-list-item' + (b.id === appState.selectedBoxId ? ' selected' : '');
+        el.innerHTML = `<span class="color-dot" style="background:${BOX_COLORS[i % BOX_COLORS.length]}"></span>
+          <span>${b.id} (${Math.round(b.width)}x${Math.round(b.depth)})</span>`;
+        el.addEventListener('click', () => selectBox(b.id));
+        list.appendChild(el);
+      });
+    }
+
+    function updateSelBoxPanel() {
+      const panel = document.getElementById('selBoxPanel');
+      const box = appState.boxes.find(b => b.id === appState.selectedBoxId);
+      panel.classList.toggle('visible', !!box);
+      if (!box) return;
+      document.getElementById('sbX').value = Math.round(box.x * 10) / 10;
+      document.getElementById('sbY').value = Math.round(box.y * 10) / 10;
+      document.getElementById('sbW').value = Math.round(box.width * 10) / 10;
+      document.getElementById('sbD').value = Math.round(box.depth * 10) / 10;
+      document.getElementById('sbH').value = box.boxHeight ?? '';
+      document.getElementById('sbR').value = box.cornerRadius;
+      document.getElementById('sbDrain').checked = box.drainEnabled;
+      document.getElementById('sbDrainOpts').classList.toggle('visible', box.drainEnabled);
+      document.getElementById('sbHoleDia').value = box.holeDiameter;
+      document.getElementById('sbHoleSpac').value = box.holeSpacing;
+    }
+
+    function readSelBoxPanel() {
+      const box = appState.boxes.find(b => b.id === appState.selectedBoxId);
+      if (!box) return;
+      box.x = parseFloat(document.getElementById('sbX').value) || 0;
+      box.y = parseFloat(document.getElementById('sbY').value) || 0;
+      box.width = parseFloat(document.getElementById('sbW').value) || 20;
+      box.depth = parseFloat(document.getElementById('sbD').value) || 20;
+      const hVal = document.getElementById('sbH').value;
+      box.boxHeight = hVal === '' ? null : (parseFloat(hVal) || null);
+      box.cornerRadius = parseFloat(document.getElementById('sbR').value) || 0;
+      box.drainEnabled = document.getElementById('sbDrain').checked;
+      box.holeDiameter = parseFloat(document.getElementById('sbHoleDia').value) || 3;
+      box.holeSpacing = parseFloat(document.getElementById('sbHoleSpac').value) || 14;
+      document.getElementById('sbDrainOpts').classList.toggle('visible', box.drainEnabled);
+      dirty = true;
+    }
+
+    function updateDrawerDims() {
+      const pts = appState.drawer.points;
+      if (pts.length < 2) { document.getElementById('drawerDims').textContent = ''; return; }
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const [x, y] of pts) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
+      document.getElementById('drawerDims').textContent = `Bounding box: ${Math.round(maxX - minX)} x ${Math.round(maxY - minY)} mm`;
+    }
+
+    function readGlobalParams() {
+      appState.globalParams.boxHeight = parseFloat(document.getElementById('gBoxHeight').value) || 50;
+      appState.globalParams.wallThickness = parseFloat(document.getElementById('gWall').value) || 2;
+      appState.globalParams.baseThickness = parseFloat(document.getElementById('gBase').value) || 2;
+      appState.globalParams.gap = parseFloat(document.getElementById('gGap').value) || 0;
+      appState.globalParams.snapGrid = parseFloat(document.getElementById('gSnap').value) || 5;
+    }
+
+    // ========== PLANNER: Rendering ==========
+    function renderPlanner() {
+      if (!dirty) return;
+      dirty = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawGrid();
+      drawDrawerShape();
+      drawBoxes();
+      drawRubberBand();
+      updateDrawerDims();
+
+      // Info
+      const [wx, wy] = screenToWorld(canvas.width / 2, canvas.height / 2);
+      document.getElementById('plannerInfo').textContent =
+        `Zoom: ${zoom.toFixed(1)}x | Pudelka: ${appState.boxes.length}`;
+    }
+
+    function drawGrid() {
+      // Pick grid spacing based on zoom
+      let gridStep = 1;
+      const steps = [1, 2, 5, 10, 20, 50, 100, 200, 500];
+      for (const s of steps) { if (s * zoom >= 10) { gridStep = s; break; } }
+
+      const [x0, y0] = screenToWorld(0, 0);
+      const [x1, y1] = screenToWorld(canvas.width, canvas.height);
+      const startX = Math.floor(x0 / gridStep) * gridStep;
+      const startY = Math.floor(y0 / gridStep) * gridStep;
+
+      ctx.strokeStyle = '#252545';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      for (let x = startX; x <= x1; x += gridStep) {
+        const [sx] = worldToScreen(x, 0);
+        ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height);
+      }
+      for (let y = startY; y <= y1; y += gridStep) {
+        const [, sy] = worldToScreen(0, y);
+        ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy);
+      }
+      ctx.stroke();
+
+      // Major grid (10x)
+      const majorStep = gridStep * 10;
+      const startMX = Math.floor(x0 / majorStep) * majorStep;
+      const startMY = Math.floor(y0 / majorStep) * majorStep;
+      ctx.strokeStyle = '#333355';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = startMX; x <= x1; x += majorStep) {
+        const [sx] = worldToScreen(x, 0);
+        ctx.moveTo(sx, 0); ctx.lineTo(sx, canvas.height);
+      }
+      for (let y = startMY; y <= y1; y += majorStep) {
+        const [, sy] = worldToScreen(0, y);
+        ctx.moveTo(0, sy); ctx.lineTo(canvas.width, sy);
+      }
+      ctx.stroke();
+
+      // Origin cross
+      const [ox, oy] = worldToScreen(0, 0);
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(ox - 10, oy); ctx.lineTo(ox + 10, oy);
+      ctx.moveTo(ox, oy - 10); ctx.lineTo(ox, oy + 10);
+      ctx.stroke();
+    }
+
+    function drawDrawerShape() {
+      const pts = appState.drawer.points;
+      if (pts.length === 0) return;
+
+      ctx.beginPath();
+      const [sx0, sy0] = worldToScreen(pts[0][0], pts[0][1]);
+      ctx.moveTo(sx0, sy0);
+      for (let i = 1; i < pts.length; i++) {
+        const [sx, sy] = worldToScreen(pts[i][0], pts[i][1]);
+        ctx.lineTo(sx, sy);
+      }
+      if (appState.drawer.closed) ctx.closePath();
+
+      if (appState.drawer.closed) {
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fill();
+      }
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Vertices
+      for (let i = 0; i < pts.length; i++) {
+        const [vx, vy] = worldToScreen(pts[i][0], pts[i][1]);
+        ctx.beginPath();
+        ctx.arc(vx, vy, (toolMode === 'edit-drawer' && i === hoverVertex) ? 6 : 4, 0, Math.PI * 2);
+        ctx.fillStyle = (i === 0 && toolMode === 'draw-drawer') ? '#e94560' : '#aaa';
+        ctx.fill();
+      }
+
+      // Dimension labels on edges
+      if (appState.drawer.closed) {
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#666';
+        for (let i = 0; i < pts.length; i++) {
+          const j = (i + 1) % pts.length;
+          const len = Math.round(Math.hypot(pts[j][0] - pts[i][0], pts[j][1] - pts[i][1]));
+          const mx = (pts[i][0] + pts[j][0]) / 2, my = (pts[i][1] + pts[j][1]) / 2;
+          const [sx, sy] = worldToScreen(mx, my);
+          ctx.fillText(`${len}`, sx + 4, sy - 4);
+        }
+      }
+    }
+
+    function drawBoxes() {
+      appState.boxes.forEach((box, i) => {
+        const [sx, sy] = worldToScreen(box.x, box.y);
+        const sw = box.width * zoom;
+        const sd = box.depth * zoom;
+        const color = BOX_COLORS[i % BOX_COLORS.length];
+        const isSelected = box.id === appState.selectedBoxId;
+
+        // Fill
+        ctx.fillStyle = color + '30';
+        ctx.fillRect(sx, sy, sw, sd);
+
+        // Border
+        ctx.strokeStyle = isSelected ? '#fff' : color;
+        ctx.lineWidth = isSelected ? 2.5 : 1.5;
+        ctx.strokeRect(sx, sy, sw, sd);
+
+        // Overlap/out-of-bounds warning
+        const hasOverlap = appState.boxes.some(other =>
+          other.id !== box.id && boxesOverlap(box, other));
+        const outOfBounds = appState.drawer.closed && !boxInsideDrawer(box);
+        if (hasOverlap) {
+          ctx.strokeStyle = '#ff8c00';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx + 1, sy + 1, sw - 2, sd - 2);
+        }
+        if (outOfBounds) {
+          ctx.strokeStyle = '#e94560';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(sx + 1, sy + 1, sw - 2, sd - 2);
+          ctx.setLineDash([]);
+        }
+
+        // Drain holes indicator
+        if (box.drainEnabled && sw > 20 && sd > 20) {
+          ctx.fillStyle = color + '60';
+          const spacing = Math.max(8, Math.min(16, sw / 5));
+          const r = Math.max(1.5, spacing / 5);
+          for (let dx = spacing; dx < sw - spacing / 2; dx += spacing) {
+            for (let dy = spacing; dy < sd - spacing / 2; dy += spacing) {
+              ctx.beginPath();
+              ctx.arc(sx + dx, sy + dy, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+
+        // Label
+        if (sw > 30 && sd > 20) {
+          ctx.font = '11px system-ui';
+          ctx.fillStyle = '#ddd';
+          ctx.textAlign = 'center';
+          ctx.fillText(`${Math.round(box.width)}x${Math.round(box.depth)}`, sx + sw / 2, sy + sd / 2 + 4);
+          ctx.textAlign = 'left';
+        }
+
+        // Resize handles (selected only)
+        if (isSelected) {
+          const handles = [
+            [sx + sw, sy + sd / 2], // right
+            [sx + sw / 2, sy + sd], // bottom
+            [sx, sy + sd / 2],       // left
+            [sx + sw / 2, sy],       // top
+          ];
+          ctx.fillStyle = '#e94560';
+          for (const [hx, hy] of handles) {
+            ctx.fillRect(hx - 4, hy - 4, 8, 8);
+          }
+        }
+      });
+    }
+
+    function drawRubberBand() {
+      if (toolMode === 'add-box' && addBoxStart) {
+        const [sx0, sy0] = worldToScreen(addBoxStart[0], addBoxStart[1]);
+        // Use last mouse pos from canvas (approximate via cursor tracking)
+        ctx.strokeStyle = '#e94560';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        // We'll track mouse pos separately for rubber band
+        ctx.setLineDash([]);
+      }
+    }
+
+    function boxesOverlap(a, b) {
+      return a.x < b.x + b.width && a.x + a.width > b.x &&
+             a.y < b.y + b.depth && a.y + a.depth > b.y;
+    }
+
+    function boxInsideDrawer(box) {
+      const pts = appState.drawer.points;
+      if (pts.length < 3) return true;
+      const corners = [[box.x, box.y], [box.x + box.width, box.y],
+                        [box.x + box.width, box.y + box.depth], [box.x, box.y + box.depth]];
+      return corners.every(([px, py]) => pointInPolygon(px, py, pts));
+    }
+
+    // ========== PLANNER: Tool Buttons ==========
+    document.getElementById('btnDrawDrawer').addEventListener('click', () => {
+      if (appState.drawer.closed) { appState.drawer.points = []; appState.drawer.closed = false; }
+      toolMode = toolMode === 'draw-drawer' ? 'idle' : 'draw-drawer';
+      updateToolButtons(); dirty = true;
+    });
+    document.getElementById('btnEditDrawer').addEventListener('click', () => {
+      if (!appState.drawer.closed) return;
+      toolMode = toolMode === 'edit-drawer' ? 'idle' : 'edit-drawer';
+      updateToolButtons(); dirty = true;
+    });
+    document.getElementById('btnClearDrawer').addEventListener('click', () => {
+      appState.drawer.points = []; appState.drawer.closed = false;
+      appState.boxes = []; appState.selectedBoxId = null;
+      toolMode = 'idle';
+      updateToolButtons(); updateBoxList(); updateSelBoxPanel(); dirty = true;
+    });
+    document.getElementById('btnAutoSplit').addEventListener('click', autoSplit);
+    document.getElementById('btnAddBox').addEventListener('click', () => {
+      toolMode = toolMode === 'add-box' ? 'idle' : 'add-box';
+      updateToolButtons();
+    });
+    document.getElementById('btnDeleteBox').addEventListener('click', deleteSelectedBox);
+
+    // Selected box panel inputs
+    ['sbX','sbY','sbW','sbD','sbH','sbR','sbHoleDia','sbHoleSpac'].forEach(id => {
+      document.getElementById(id).addEventListener('input', readSelBoxPanel);
+    });
+    document.getElementById('sbDrain').addEventListener('change', readSelBoxPanel);
+
+    // Global params
+    ['gBoxHeight','gWall','gBase','gGap','gSnap'].forEach(id => {
+      document.getElementById(id).addEventListener('input', readGlobalParams);
+    });
+
+    // ========== EDITOR: Three.js Setup ==========
+    const edViewport = document.getElementById('viewport');
+    let edScene, edCamera, edRenderer, edControls, edBoxMesh;
+    let editorInitialized = false;
+
+    function initEditor() {
+      if (editorInitialized) { updateEditorPreview(); return; }
+      editorInitialized = true;
+
+      edScene = new THREE.Scene();
+      edScene.background = new THREE.Color(0x1a1a2e);
+
+      edCamera = new THREE.PerspectiveCamera(45, edViewport.clientWidth / edViewport.clientHeight, 0.1, 10000);
+      edCamera.position.set(180, 160, 180);
+
+      edRenderer = new THREE.WebGLRenderer({ antialias: true });
+      edRenderer.setSize(edViewport.clientWidth, edViewport.clientHeight);
+      edRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      edViewport.appendChild(edRenderer.domElement);
+
+      edControls = new OrbitControls(edCamera, edRenderer.domElement);
+      edControls.enableDamping = true;
+      edControls.dampingFactor = 0.08;
+      edControls.target.set(0, 25, 0);
+      edControls.update();
+
+      edScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const d = new THREE.DirectionalLight(0xffffff, 0.9);
+      d.position.set(150, 250, 100);
+      edScene.add(d);
+      const b = new THREE.DirectionalLight(0xffffff, 0.3);
+      b.position.set(-100, 100, -150);
+      edScene.add(b);
+      edScene.add(new THREE.GridHelper(300, 30, 0x333355, 0x252545));
+
+      // Fill editor from selected box or defaults
+      loadBoxToEditor();
+      updateEditorPreview();
+
+      function edAnimate() {
+        requestAnimationFrame(edAnimate);
+        if (views.editor.classList.contains('active')) {
+          edControls.update();
+          edRenderer.render(edScene, edCamera);
+        }
+      }
+      edAnimate();
+    }
+
+    function resizeEditor() {
+      if (!edRenderer) return;
+      const w = edViewport.clientWidth, h = edViewport.clientHeight;
+      edCamera.aspect = w / h;
+      edCamera.updateProjectionMatrix();
+      edRenderer.setSize(w, h);
+    }
+
+    // ========== EDITOR: Geometry (reused from original) ==========
+    const edMaterial = new THREE.MeshStandardMaterial({ color: 0xff6b35, roughness: 0.6, metalness: 0.05 });
 
     function drawRoundedRect(target, w, d, r) {
       const hw = w / 2, hd = d / 2;
       r = Math.min(Math.max(r, 0), hw, hd);
-
       target.moveTo(-hw + r, -hd);
       target.lineTo(hw - r, -hd);
       if (r > 0) target.absarc(hw - r, -hd + r, r, -Math.PI / 2, 0, false);
@@ -228,77 +1024,49 @@
 
     function generateBoxGeometry(params) {
       const { width, depth, height, wallThickness, baseThickness, cornerRadius, drainEnabled, holeDiameter, holeSpacing } = params;
-
       const outerRadius = Math.min(cornerRadius, width / 2, depth / 2);
       const innerWidth = width - 2 * wallThickness;
       const innerDepth = depth - 2 * wallThickness;
       const innerRadius = Math.max(0, outerRadius - wallThickness);
       const wallHeight = height - baseThickness;
-
       if (innerWidth <= 0 || innerDepth <= 0 || wallHeight <= 0) return null;
 
       const geometries = [];
       const wallCurveSegments = outerRadius > 0 ? 16 : 1;
 
-      // --- Walls: extruded frame (outer - inner hole) ---
       const wallShape = new THREE.Shape();
       drawRoundedRect(wallShape, width, depth, outerRadius);
-
       const innerHole = new THREE.Path();
       drawRoundedRect(innerHole, innerWidth, innerDepth, innerRadius);
       wallShape.holes.push(innerHole);
-
-      const wallGeom = new THREE.ExtrudeGeometry(wallShape, {
-        depth: wallHeight,
-        bevelEnabled: false,
-        curveSegments: wallCurveSegments,
-      });
-      // Rotate so extrusion goes along Y (up) instead of Z
+      const wallGeom = new THREE.ExtrudeGeometry(wallShape, { depth: wallHeight, bevelEnabled: false, curveSegments: wallCurveSegments });
       wallGeom.rotateX(-Math.PI / 2);
       wallGeom.translate(0, baseThickness, 0);
       geometries.push(wallGeom);
 
-      // --- Bottom plate ---
       const bottomShape = new THREE.Shape();
       drawRoundedRect(bottomShape, width, depth, outerRadius);
-
-      // Drainage holes
       if (drainEnabled && holeDiameter > 0 && holeSpacing > 0) {
         const hr = holeDiameter / 2;
         const margin = wallThickness + hr + 0.5;
-        const areaW = width - 2 * margin;
-        const areaD = depth - 2 * margin;
-
+        const areaW = width - 2 * margin, areaD = depth - 2 * margin;
         if (areaW > 0 && areaD > 0) {
-          const countX = Math.max(1, Math.floor(areaW / holeSpacing) + 1);
-          const countY = Math.max(1, Math.floor(areaD / holeSpacing) + 1);
-          const startX = -(countX - 1) * holeSpacing / 2;
-          const startY = -(countY - 1) * holeSpacing / 2;
-
-          for (let i = 0; i < countX; i++) {
-            for (let j = 0; j < countY; j++) {
-              const cx = startX + i * holeSpacing;
-              const cy = startY + j * holeSpacing;
-
-              // Stay within inner bounds
-              if (Math.abs(cx) + hr <= innerWidth / 2 - 0.5 &&
-                  Math.abs(cy) + hr <= innerDepth / 2 - 0.5) {
-                const hole = new THREE.Path();
-                hole.moveTo(cx + hr, cy);
-                hole.absarc(cx, cy, hr, 0, Math.PI * 2, false);
-                bottomShape.holes.push(hole);
-              }
+          const cntX = Math.max(1, Math.floor(areaW / holeSpacing) + 1);
+          const cntY = Math.max(1, Math.floor(areaD / holeSpacing) + 1);
+          const stX = -(cntX - 1) * holeSpacing / 2, stY = -(cntY - 1) * holeSpacing / 2;
+          for (let i = 0; i < cntX; i++) for (let j = 0; j < cntY; j++) {
+            const cx = stX + i * holeSpacing, cy = stY + j * holeSpacing;
+            if (Math.abs(cx) + hr <= innerWidth / 2 - 0.5 && Math.abs(cy) + hr <= innerDepth / 2 - 0.5) {
+              const hole = new THREE.Path();
+              hole.moveTo(cx + hr, cy);
+              hole.absarc(cx, cy, hr, 0, Math.PI * 2, false);
+              bottomShape.holes.push(hole);
             }
           }
         }
       }
-
-      const bottomCurveSegments = (drainEnabled || outerRadius > 0) ? 16 : 1;
-      const bottomGeom = new THREE.ExtrudeGeometry(bottomShape, {
-        depth: baseThickness,
-        bevelEnabled: false,
-        curveSegments: bottomCurveSegments,
-      });
+      const bottomCS = (drainEnabled || outerRadius > 0) ? 16 : 1;
+      const bottomGeom = new THREE.ExtrudeGeometry(bottomShape, { depth: baseThickness, bevelEnabled: false, curveSegments: bottomCS });
       bottomGeom.rotateX(-Math.PI / 2);
       geometries.push(bottomGeom);
 
@@ -307,140 +1075,229 @@
       return merged;
     }
 
-    // --- Read params from form ---
-
-    function getParams() {
+    // ========== EDITOR: Load/Save Box ==========
+    function getEditorParams() {
       return {
-        width: parseFloat(document.getElementById('width').value) || 100,
-        depth: parseFloat(document.getElementById('depth').value) || 100,
-        height: parseFloat(document.getElementById('height').value) || 50,
-        wallThickness: parseFloat(document.getElementById('wallThickness').value) || 2,
-        baseThickness: parseFloat(document.getElementById('baseThickness').value) || 2,
-        cornerRadius: parseFloat(document.getElementById('cornerRadius').value) || 0,
-        drainEnabled: drainCheck.checked,
-        holeDiameter: parseFloat(document.getElementById('holeDiameter').value) || 5,
-        holeSpacing: parseFloat(document.getElementById('holeSpacing').value) || 15,
+        width: parseFloat(document.getElementById('edWidth').value) || 100,
+        depth: parseFloat(document.getElementById('edDepth').value) || 100,
+        height: parseFloat(document.getElementById('edHeight').value) || 50,
+        wallThickness: parseFloat(document.getElementById('edWall').value) || 2,
+        baseThickness: parseFloat(document.getElementById('edBase').value) || 2,
+        cornerRadius: parseFloat(document.getElementById('edRadius').value) || 0,
+        drainEnabled: document.getElementById('edDrain').checked,
+        holeDiameter: parseFloat(document.getElementById('edHoleDia').value) || 3,
+        holeSpacing: parseFloat(document.getElementById('edHoleSpac').value) || 14,
       };
     }
 
-    // --- Validation ---
-
-    function validate(p) {
-      const errors = [];
-      if (p.wallThickness * 2 >= p.width) errors.push('Scianki za grube dla tej szerokosci');
-      if (p.wallThickness * 2 >= p.depth) errors.push('Scianki za grube dla tej glebokosci');
-      if (p.baseThickness >= p.height) errors.push('Podstawa za gruba dla tej wysokosci');
-      if (p.cornerRadius > Math.min(p.width, p.depth) / 2) errors.push('Promien zaokraglenia za duzy');
-      if (p.drainEnabled && p.holeDiameter >= Math.min(p.width, p.depth) - 2 * p.wallThickness) {
-        errors.push('Otwory za duze');
+    function loadBoxToEditor() {
+      const box = appState.boxes.find(b => b.id === appState.editingBoxId);
+      const g = appState.globalParams;
+      if (box) {
+        const gap = g.gap;
+        document.getElementById('edWidth').value = Math.round((box.width - gap) * 10) / 10;
+        document.getElementById('edDepth').value = Math.round((box.depth - gap) * 10) / 10;
+        document.getElementById('edHeight').value = box.boxHeight ?? g.boxHeight;
+        document.getElementById('edWall').value = g.wallThickness;
+        document.getElementById('edBase').value = g.baseThickness;
+        document.getElementById('edRadius').value = box.cornerRadius;
+        document.getElementById('edDrain').checked = box.drainEnabled;
+        document.getElementById('edDrainOpts').classList.toggle('visible', box.drainEnabled);
+        document.getElementById('edHoleDia').value = box.holeDiameter;
+        document.getElementById('edHoleSpac').value = box.holeSpacing;
       }
-      return errors;
     }
 
-    // --- Update preview ---
+    function syncEditorBack() {
+      const box = appState.boxes.find(b => b.id === appState.editingBoxId);
+      if (!box) return;
+      const p = getEditorParams();
+      box.cornerRadius = p.cornerRadius;
+      box.drainEnabled = p.drainEnabled;
+      box.holeDiameter = p.holeDiameter;
+      box.holeSpacing = p.holeSpacing;
+      const hVal = p.height;
+      box.boxHeight = hVal === appState.globalParams.boxHeight ? null : hVal;
+      dirty = true;
+    }
 
-    function updatePreview() {
-      const params = getParams();
-      const errors = validate(params);
+    function updateEditorPreview() {
+      if (!edScene) return;
+      const params = getEditorParams();
 
-      // Show/hide errors
-      if (errors.length > 0) {
-        errorEl.textContent = errors.join('; ');
-        errorEl.classList.add('visible');
-      } else {
-        errorEl.classList.remove('visible');
-      }
+      if (edBoxMesh) { edScene.remove(edBoxMesh); edBoxMesh.geometry.dispose(); edBoxMesh = null; }
 
-      // Mark invalid fields
-      document.querySelectorAll('input[type="number"]').forEach(input => input.classList.remove('invalid'));
-      if (errors.length > 0) {
-        // Simple heuristic: mark fields that are likely wrong
-        if (params.wallThickness * 2 >= params.width || params.wallThickness * 2 >= params.depth) {
-          document.getElementById('wallThickness').classList.add('invalid');
-        }
-        if (params.baseThickness >= params.height) {
-          document.getElementById('baseThickness').classList.add('invalid');
-        }
-      }
-
-      // Remove old mesh
-      if (boxMesh) {
-        scene.remove(boxMesh);
-        boxMesh.geometry.dispose();
-        boxMesh = null;
-      }
-
-      // Generate new geometry
       const geometry = generateBoxGeometry(params);
       if (geometry) {
-        boxMesh = new THREE.Mesh(geometry, boxMaterial);
-        scene.add(boxMesh);
-
-        const triCount = geometry.index
-          ? geometry.index.count / 3
-          : geometry.attributes.position.count / 3;
-        infoEl.textContent = `${params.width} x ${params.depth} x ${params.height} mm | ${Math.round(triCount)} triangles`;
+        edBoxMesh = new THREE.Mesh(geometry, edMaterial);
+        edScene.add(edBoxMesh);
+        const tc = geometry.index ? geometry.index.count / 3 : geometry.attributes.position.count / 3;
+        document.getElementById('edInfo').textContent = `${params.width} x ${params.depth} x ${params.height} mm | ${Math.round(tc)} tri`;
       } else {
-        infoEl.textContent = 'Invalid parameters';
+        document.getElementById('edInfo').textContent = 'Invalid parameters';
       }
     }
 
-    // --- STL export ---
+    // ========== EDITOR: Events ==========
+    let edDebounce = null;
+    function onEdParamChange() { clearTimeout(edDebounce); edDebounce = setTimeout(updateEditorPreview, 150); }
 
-    function exportSTL() {
-      if (!boxMesh) return;
+    ['edWidth','edDepth','edHeight','edWall','edBase','edRadius','edHoleDia','edHoleSpac'].forEach(id => {
+      document.getElementById(id).addEventListener('input', onEdParamChange);
+    });
+    document.getElementById('edDrain').addEventListener('change', () => {
+      document.getElementById('edDrainOpts').classList.toggle('visible', document.getElementById('edDrain').checked);
+      onEdParamChange();
+    });
+
+    // ========== EDITOR: STL Export ==========
+    function exportSingleSTL(params, filename) {
+      const geometry = generateBoxGeometry(params);
+      if (!geometry) return;
+      const mesh = new THREE.Mesh(geometry, edMaterial);
       const exporter = new STLExporter();
-      const result = exporter.parse(boxMesh, { binary: true });
+      const result = exporter.parse(mesh, { binary: true });
+      geometry.dispose();
       const blob = new Blob([result], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      const p = getParams();
-      a.download = `box_${p.width}x${p.depth}x${p.height}.stl`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    // --- Event listeners ---
+    document.getElementById('edExportBtn').addEventListener('click', () => {
+      const p = getEditorParams();
+      exportSingleSTL(p, `box_${p.width}x${p.depth}x${p.height}.stl`);
+    });
 
-    let debounceTimer = null;
-    function onParamChange() {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(updatePreview, 150);
+    // ========== PLANNER: Edit 3D / Export single box ==========
+    document.getElementById('btnEditBox3D').addEventListener('click', () => {
+      if (!appState.selectedBoxId) return;
+      appState.editingBoxId = appState.selectedBoxId;
+      switchView('editor');
+    });
+
+    document.getElementById('btnBoxSTL').addEventListener('click', () => {
+      const box = appState.boxes.find(b => b.id === appState.selectedBoxId);
+      if (!box) return;
+      const g = appState.globalParams;
+      const gap = g.gap;
+      const params = {
+        width: box.width - gap, depth: box.depth - gap,
+        height: box.boxHeight ?? g.boxHeight,
+        wallThickness: g.wallThickness, baseThickness: g.baseThickness,
+        cornerRadius: box.cornerRadius, drainEnabled: box.drainEnabled,
+        holeDiameter: box.holeDiameter, holeSpacing: box.holeSpacing,
+      };
+      exportSingleSTL(params, `${box.id}_${Math.round(params.width)}x${Math.round(params.depth)}x${params.height}.stl`);
+    });
+
+    // ========== IMPORT/EXPORT JSON ==========
+    document.getElementById('btnSaveJSON').addEventListener('click', () => {
+      readGlobalParams();
+      const data = {
+        version: 1,
+        drawer: { ...appState.drawer },
+        globalParams: { ...appState.globalParams },
+        boxes: appState.boxes.map(b => ({ ...b })),
+      };
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'drawer_config.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('btnLoadJSON').addEventListener('click', () => {
+      document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (data.version !== 1) { alert('Nieobslugiwana wersja pliku'); return; }
+          appState.drawer = data.drawer || { points: [], closed: false };
+          appState.globalParams = { ...appState.globalParams, ...data.globalParams };
+          appState.boxes = data.boxes || [];
+          appState.selectedBoxId = null;
+          // Update nextBoxId
+          let maxId = 0;
+          appState.boxes.forEach(b => {
+            const num = parseInt(b.id.replace('box-', ''));
+            if (num > maxId) maxId = num;
+          });
+          nextBoxId = maxId + 1;
+          // Update UI
+          document.getElementById('gBoxHeight').value = appState.globalParams.boxHeight;
+          document.getElementById('gWall').value = appState.globalParams.wallThickness;
+          document.getElementById('gBase').value = appState.globalParams.baseThickness;
+          document.getElementById('gGap').value = appState.globalParams.gap;
+          document.getElementById('gSnap').value = appState.globalParams.snapGrid;
+          updateBoxList(); updateSelBoxPanel();
+          // Center view on drawer
+          if (appState.drawer.points.length > 0) {
+            let cx = 0, cy = 0;
+            appState.drawer.points.forEach(([x, y]) => { cx += x; cy += y; });
+            cx /= appState.drawer.points.length; cy /= appState.drawer.points.length;
+            camX = cx; camY = cy;
+          }
+          dirty = true;
+        } catch (err) { alert('Blad wczytywania: ' + err.message); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    // ========== ZIP EXPORT ==========
+    document.getElementById('btnExportZIP').addEventListener('click', async () => {
+      if (appState.boxes.length === 0) return;
+      const zip = new JSZip();
+      const exporter = new STLExporter();
+      const g = appState.globalParams;
+      const gap = g.gap;
+
+      for (const box of appState.boxes) {
+        const params = {
+          width: box.width - gap, depth: box.depth - gap,
+          height: box.boxHeight ?? g.boxHeight,
+          wallThickness: g.wallThickness, baseThickness: g.baseThickness,
+          cornerRadius: box.cornerRadius, drainEnabled: box.drainEnabled,
+          holeDiameter: box.holeDiameter, holeSpacing: box.holeSpacing,
+        };
+        const geometry = generateBoxGeometry(params);
+        if (!geometry) continue;
+        const mesh = new THREE.Mesh(geometry, edMaterial);
+        const stl = exporter.parse(mesh, { binary: true });
+        geometry.dispose();
+        const fname = `${box.id}_${Math.round(params.width)}x${Math.round(params.depth)}x${params.height}.stl`;
+        zip.file(fname, stl);
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'drawer_layout.zip';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // ========== PLANNER: Render Loop ==========
+    function plannerLoop() {
+      requestAnimationFrame(plannerLoop);
+      if (views.planner.classList.contains('active')) renderPlanner();
     }
 
-    document.querySelectorAll('.controls input[type="number"]').forEach(input => {
-      input.addEventListener('input', onParamChange);
-    });
-
-    drainCheck.addEventListener('change', () => {
-      drainOpts.classList.toggle('visible', drainCheck.checked);
-      onParamChange();
-    });
-
-    document.getElementById('exportBtn').addEventListener('click', exportSTL);
-
-    // --- Resize ---
-    window.addEventListener('resize', () => {
-      const w = viewport.clientWidth;
-      const h = viewport.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    });
-
-    // --- Render loop ---
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    // --- Init ---
-    updatePreview();
-    animate();
+    // ========== INIT ==========
+    updateToolButtons();
+    updateBoxList();
+    plannerLoop();
   </script>
 </body>
 </html>
